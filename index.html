@@ -32,8 +32,10 @@ h2 button{min-height:40px;font-size:15px;padding:0 12px}
 .wide{grid-column:1/-1}
 .lb{display:block;margin:14px 0 6px;font-size:14px;font-weight:600;color:var(--mut)}
 .row{display:flex;gap:6px}
-input[type=text],input[type=date]{flex:1;min-width:0;width:100%;font:inherit;min-height:46px;padding:0 12px;border:1px solid var(--ln);border-radius:8px;background:var(--w)}
-input:focus{outline:2px solid var(--ac);outline-offset:-1px;border-color:transparent}
+input[type=text],input[type=date],select{flex:1;min-width:0;width:100%;font:inherit;min-height:46px;padding:0 12px;border:1px solid var(--ln);border-radius:8px;background:var(--w)}
+input:focus,select:focus{outline:2px solid var(--ac);outline-offset:-1px;border-color:transparent}
+input:disabled{background:#eef0f3;color:var(--mut);font-style:italic}
+button.s.ras{background:var(--dg);color:#fff;border-color:var(--dg)}
 .op{display:flex;flex-wrap:wrap;gap:8px}
 .op label{display:flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--ln);border-radius:99px;cursor:pointer}
 .op label:has(input:checked){background:var(--acs);border-color:var(--ac);color:#00664d;font-weight:600}
@@ -92,14 +94,14 @@ dialog .b{display:flex;gap:8px;justify-content:flex-end}
 <input type="file" id="fi" accept="image/*" capture="environment" hidden>
 <input type="file" id="fg" accept="image/*" hidden>
 <script>
-const T=l=>['t',l],Dt=l=>['d',l],R=(l,o)=>['r',l,o.split('|')],C=(l,o)=>['c',l,o.split('|')],Q=(l,o)=>['q',l,o.split('|')];
+const T=l=>['t',l],Dt=l=>['d',l],R=(l,o)=>['r',l,o.split('|')],C=(l,o)=>['c',l,o.split('|')],Q=(l,o)=>['q',l,o.split('|')],Sel=(l,o)=>['s',l,o.split('|')];
 const S=[
 {t:'Information site',f:[T("Donneur d'ordre : entreprise / nom"),T('Client livré / ville'),T('Adresse du site'),Dt('Date de la visite technique'),R('Accès au site','Facile|Modéré|Difficile'),T('Contact visite technique'),T("Personnes présentes à l'audit (entreprise, nom, fonction, email, tél.)"),T('Opportunité')]},
-{t:'Information Installateur',id:'inst',f:[T('Nom Installateur'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
+{t:'Information Installateur',id:'inst',f:[Sel('Nom Installateur','Benoit SMOLEN|Benjamin MOUTON|Romuald TURLUT|Serkan ERDOGAN'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
 {t:'Parking',f:[T('Nom du parking'),T('Nombre de places à équiper'),T('Places standard (qté)'),T('Places PMR (qté)'),C('Véhicules concernés','Collaborateur|Visiteur|Public')]},
 {t:'Énergie électrique',f:[R('Type de tarif','Vert|Jaune (PDL C4)|Bleu (PDL C5)'),T('Puissance transfo (kVA)'),R('Régime de neutre','TNS|TNC|TT|IT'),T("Si IT : emplacement et dimensions du transformateur d'isolement"),T('Puissance souscrite (PDL C4) : code 110'),T('Puissance souscrite (PDL C4) : code 111'),T('Puissance souscrite (PDL C4) : code 112'),T('Puissance de soutirage (PDL C4) : code 160'),T('Puissance de soutirage (PDL C4) : code 161'),T('Puissance de soutirage (PDL C4) : code 162'),R('Augmentation de la puissance souscrite','Oui|Non'),R('Installation TD IRVE','Oui|TD CFO/CFA|TD CFO|TD CFA|Non'),T('Localisation de la barrette de terre')]},
 {t:'Bornes',f:[C('Puissance des bornes','7 kW|11 kW|22 kW|Autres'),T('Bornes existantes (qté par puissance)'),T('Bornes à installer (qté par puissance)'),T('Pré-équipements (qté par puissance)'),R('Coefficient de foisonnement','0,6|0,7|0,8|1'),T('Pose sur pied (qté)'),T('Pose murale (qté)'),C('Emplacement des bornes','Intérieur|Extérieur'),R('Communication des bornes','Oui|4G (bonne réception)|Non'),C('Type de communication','TD CFA existant|Nouveau TD CFA à créer|Liaison filaire|Carte SIM intégrée'),R('Manutention des bornes à prévoir','Oui|Non')]},
-{t:'Génie civil',f:[Q('Massifs à créer','TD IRVE|Borne|Potelet|Arceau|Panneau de signalisation'),Q('Chambres à prévoir','L1C|L2C|L1T|L2T|Autres'),Q('Tranchées (longueur en m)','Terre végétale|Enrobé|Béton'),T('Élagage (m)'),T('Percement (nbr)'),T('Bordure - dépose (m)'),T('Bordure - pose (m)'),T('Carottage (nbr)'),T('Panneaux de signalisation (qté)'),Q('Marquage au sol','1 Grand Logo VE Central|1 Grand Logo VE| 2 Petits Logos VE'),T('Ligne de stationnement (m)'),Q('Protection mécanique','Arceau|Stop roue|Potelet')]},
+{t:'Génie civil',f:[Q('Massifs à créer','TD IRVE|Borne|Potelet|Arceau|Panneau de signalisation'),Q('Chambres à prévoir','L1C|L2C|L1T|L2T|Autres'),Q('Tranchées (longueur en m)','Terre végétale|Enrobé|Béton'),T('Élagage (m)'),T('Percement (nbr)'),T('Bordure - dépose (m)'),T('Bordure - pose (m)'),T('Carottage (nbr)'),T('Panneaux de signalisation (qté)'),C('Marquage au sol','1 Grand Logo VE Central|1 Grand Logo VE|2 Petits Logos VE'),T('Ligne de stationnement (m)'),Q('Protection mécanique','Arceau|Stop roue|Potelet')]},
 {t:'Cheminement',f:[T('Pose CDC : dimensions / longueur (m)'),T('Pose CDC capoté : dimensions / longueur (m)'),T('Pose tube IRO : dimensions / longueur (m)'),T('Pose goulotte : dimensions / longueur (m)'),T('Longueur du cheminement (m)')]},
 {t:'Disjoncteur général',f:[T('Nombre de pôles'),T('Vigi : sensibilité (mA)'),T('Vigi : temporisation (ms)'),T('Réglage déclencheur - Io (A)'),T('Réglage déclencheur - Ir (A)'),T('Réglage déclencheur - Isd (A)')]},
 {t:'Reportage photos',photos:["Entrée du site","Origine de l'installation / compteur",'Disjoncteur général','Cheminement origine > TD IRVE','Cheminement TD IRVE > bornes','Emplacement des bornes','Schémas électriques existants'],f:[]},
@@ -108,7 +110,10 @@ const S=[
 ];
 const N=['Info_site','Parking','Energie','Borne','Genie_civil','Cheminement','Disjoncteur','Reportage','Coupure','Plans'];
 N.inst='Installateur';S.forEach((x,i)=>x.i=x.id||(i>1?i-1:i));
-let db={clients:['Exemplaire Test','50Five','AMARA NET ZERO FRANCE','BUMP','CAP BORNE','CHARGE EXPERT'],data:{}},cur=null,tm,tgt;
+// Coordonnées par installateur : à compléter par A (mail, num). Le choix du nom en 3
+// (Information Installateur) préremplit automatiquement ces deux champs sur le formulaire.
+const INST={'Benoit SMOLEN':{mail:'benoit.smolen@ensio.eu',num:'06 31 27 40 30'},"Benjamin MOUTON":{mail:'benjamin.mouton@ensio.eu',num:''},"Romuald TURLUT":{mail:'romuald.turlut@ensio.eu',num:'07 71 35 39 80'},'Serkan ERDOGAN':{mail:'Serkan.Erdogan@ensio.eu',num:'07 85 93 27 56'}};
+let db={clients:['50five','Amara Net Zero France','Bump','Cap Borne','Charge Expert','DKV','E55C','Edenred','Freshmile','Izivia','Mahle','Modulo','Renault','Time2Plug','Total','Watt','We Connect','We-Online','Ze Watt'],data:{}},cur=null,tm,tgt;
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
 const fmtv=v=>Array.isArray(v)?v.join(', '):(v&&typeof v=='object')?Object.entries(v).map(([o,q])=>o+(q?' ('+q+')':'')).join(', '):(v||'');
@@ -128,8 +133,9 @@ function render(){
   if(s.photos)return `<section id="s${i}"><h2><span>${s.t}</span></h2>`+s.photos.map((lbl,j)=>{const k='rp'+s.i+'.'+j;
     return `<div class="pig"><span class="lb">${lbl}</span><div class="row"><button class="s" data-ph="${k}">${I.cam}Photo</button><button class="s" data-gal="${k}">${I.img}Galerie</button></div>${thumbs(k)}</div>`}).join('')+'</section>';
   return `<section id="s${i}"><h2><span>${s.t}</span>${s.plan?`<button class="s" data-plan="p${s.i}">${I.pen}Nouveau plan</button>`:''}<button class="s" data-ph="p${s.i}">${I.cam}Photo</button><button class="s" data-gal="p${s.i}">${I.img}Galerie</button></h2>${thumbs('p'+s.i)}<div class="fg">`+s.f.map((f,j)=>{const k=s.i+'.'+j,v=D().v[k];let h=`<span class="lb">${f[1]}</span>`;
-  if(f[0]=='t')h+=`<div class="row"><input type="text" data-k="${k}" value="${esc(v)}"><button class="s" data-ink="${k}" aria-label="Écrire au stylet">${I.pen}</button></div>`+thumbs(k);
+  if(f[0]=='t'){const ras=(D().ras||{})[k];h+=`<div class="row"><input type="text" data-k="${k}" value="${esc(ras?'RAS':v)}" ${ras?'disabled':''}><button class="s${ras?' ras':''}" data-ras="${k}" aria-label="RAS">X</button></div>`+thumbs(k)}
   else if(f[0]=='d')h+=`<input type="date" data-k="${k}" value="${esc(v)}">`;
+  else if(f[0]=='s')h+=`<select data-k="${k}"><option value="">-</option>${f[2].map(o=>`<option ${v==o?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
   else if(f[0]=='q'){const vv=v||{};h+=`<div class="qc">${f[2].map(o=>`<div class="qi"><label><input type="checkbox" data-qk="${k}" data-qo="${esc(o)}" ${vv[o]!=null?'checked':''}>${o}</label>${vv[o]!=null?`<input type="text" inputmode="numeric" class="qn" data-qn="${k}|${esc(o)}" value="${esc(vv[o])}" placeholder="Qté">`:''}</div>`).join('')}</div>`}
   else h+=`<div class="op">${f[2].map(o=>`<label><input type="${f[0]=='r'?'radio':'checkbox'}" name="${k}" data-k="${k}" data-o="${esc(o)}" ${(f[0]=='r'?v==o:(v||[]).includes(o))?'checked':''}>${o}</label>`).join('')}</div>`;
   return `<div class="${f[0]=='t'||f[0]=='d'?'':'wide'}">${h}</div>`}).join('')+'</div></section>'}).join('');
@@ -153,7 +159,7 @@ function edit(src,w,h,cb){
   if(d.x){snap();x.fillStyle='#fff';x.fillRect(0,0,w,h);if(src)x.drawImage(src,0,0,w,h)}
   if(d.ok){cb(c.toDataURL('image/jpeg',.8),w,h);o.hidden=true}
   if(d.no)ask('Fermer sans enregistrer ?','Fermer',1).then(y=>{if(y)o.hidden=true})}}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-cl],[data-nc],[data-home],[data-pdf],[data-zip],[data-ppt],[data-reset],[data-ph],[data-gal],[data-ink],[data-plan],[data-del]');if(!b)return;const d=b.dataset;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cl],[data-nc],[data-home],[data-pdf],[data-zip],[data-ppt],[data-reset],[data-ph],[data-gal],[data-ras],[data-plan],[data-del]');if(!b)return;const d=b.dataset;
  if(d.cl){cur=d.cl;render()}
  if(d.nc){const n=prompt('Nom du client :');if(n&&!db.clients.includes(n)){db.clients.push(n);save();render()}}
  if(d.home){cur=null;render()}
@@ -162,8 +168,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-cl],[data-
  if(d.ppt)ppt();
  if(d.ph){tgt=d.ph;$('#fi').click()}
  if(d.gal){tgt=d.gal;$('#fg').click()}
- if(d.ink)edit(null,1000,220,(u,w,h)=>add(d.ink,u,w,h));
  if(d.plan)edit(null,1600,1100,(u,w,h)=>add(d.plan,u,w,h));
+ if(d.ras){const k=d.ras,dd=D();dd.ras??={};dd.rasPrev??={};
+  if(dd.ras[k]){dd.v[k]=dd.rasPrev[k]||'';delete dd.ras[k];delete dd.rasPrev[k]}
+  else{dd.rasPrev[k]=dd.v[k]||'';dd.v[k]='RAS';dd.ras[k]=true}
+  save();render()}
  if(d.del){const[k,i]=d.del.split('|');ask('Supprimer cette image ?','Supprimer',1).then(y=>{if(y){const[m]=D().m[k].splice(i,1);if(m.id)idb('del','o:'+m.id);save();render()}})}
  if(d.reset)ask('Réinitialiser le formulaire « '+cur+' » ? Toutes les réponses, photos (originaux compris), écritures et plans de ce client seront supprimés définitivement. Pensez à exporter avant.','Tout supprimer',1).then(async y=>{if(!y)return;for(const k in D().m)for(const m of D().m[k])if(m.id)await idb('del','o:'+m.id);delete db.data[cur];await idb('put','db',db);render();scrollTo(0,0)})});
 document.addEventListener('input',e=>{const t=e.target;
@@ -171,8 +180,9 @@ document.addEventListener('input',e=>{const t=e.target;
  const k=t.dataset.k;if(!k)return;
  if(t.type=='checkbox'){const a=D().v[k]??=[];t.checked?a.push(t.dataset.o):a.splice(a.indexOf(t.dataset.o),1)}
  else if(t.type=='radio')D().v[k]=t.dataset.o;else D().v[k]=t.value;save()});
-document.addEventListener('change',e=>{const t=e.target;if(!t.dataset.qo)return;const k=t.dataset.qk,o=t.dataset.qo,ob=D().v[k]??={};
- if(t.checked)ob[o]=ob[o]??''; else delete ob[o];save();render()});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.qo){const k=t.dataset.qk,o=t.dataset.qo,ob=D().v[k]??={};if(t.checked)ob[o]=ob[o]??''; else delete ob[o];save();render();return}
+ if(t.dataset.k=='inst.0'){const inf=INST[t.value];if(inf){D().v['inst.1']=inf.mail;D().v['inst.2']=inf.num}save();render()}});
 $('#fi').onchange=$('#fg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const im=new Image(),k=tgt;
  im.onload=()=>{const s=Math.min(1,1280/Math.max(im.width,im.height));edit(im,Math.round(im.width*s),Math.round(im.height*s),(u,w,h)=>add(k,u,w,h,f))};
  im.onerror=()=>alert('Format image non lisible.');im.src=URL.createObjectURL(f)};
