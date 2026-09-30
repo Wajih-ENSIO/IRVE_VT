@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Audit IRVE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<style>
+:root{--ink:#14202e;--mut:#5d6b7a;--ac:#00926f;--acs:#e3f5ef;--bg:#f2f4f6;--ln:#d9dfe5;--w:#fff;--dg:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 "Segoe UI",system-ui,sans-serif}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+header{position:sticky;top:0;z-index:5;background:var(--w);border-bottom:1px solid var(--ln);padding:8px 16px;display:flex;gap:8px;align-items:center}
+header h1{flex:1;margin:0;font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#st{font-size:14px;color:var(--mut)}
+button{font:inherit;font-weight:600;font-size:16px;min-height:46px;padding:0 16px;border:1px solid transparent;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--ac);color:#fff;cursor:pointer}
+button.s{background:var(--w);color:var(--ink);border-color:var(--ln)}
+button.t{background:transparent;color:var(--mut)}
+button.d{color:var(--dg)}
+button.dz{background:var(--dg)}
+button:active{filter:brightness(.92)}
+nav{position:sticky;top:63px;z-index:4;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:8px 16px}
+nav[hidden]{display:none}
+nav a{white-space:nowrap;padding:7px 14px;border-radius:99px;background:var(--w);border:1px solid var(--ln);color:var(--ink);text-decoration:none;font-size:15px}
+main{max-width:980px;margin:0 auto;padding:8px 16px 48px}
+.hi{font-size:22px;margin:16px 0 12px}
+section{background:var(--w);border:1px solid var(--ln);border-radius:12px;padding:16px 20px 20px;margin-bottom:16px;scroll-margin-top:125px}
+h2{margin:0 0 4px;font-size:19px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+h2 span{flex:1;min-width:140px}
+h2 button{min-height:40px;font-size:15px;padding:0 12px}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 20px}
+.wide{grid-column:1/-1}
+.lb{display:block;margin:14px 0 6px;font-size:14px;font-weight:600;color:var(--mut)}
+.row{display:flex;gap:6px}
+input[type=text],input[type=date]{flex:1;min-width:0;width:100%;font:inherit;min-height:46px;padding:0 12px;border:1px solid var(--ln);border-radius:8px;background:var(--w)}
+input:focus{outline:2px solid var(--ac);outline-offset:-1px;border-color:transparent}
+.op{display:flex;flex-wrap:wrap;gap:8px}
+.op label{display:flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--ln);border-radius:99px;cursor:pointer}
+.op label:has(input:checked){background:var(--acs);border-color:var(--ac);color:#00664d;font-weight:600}
+.op input{position:absolute;opacity:0;pointer-events:none}
+.th{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.th:empty{display:none}
+.th div{position:relative}
+.th img{height:96px;border-radius:8px;border:1px solid var(--ln);display:block}
+.th button{position:absolute;top:4px;right:4px;min-height:28px;width:28px;padding:0;border-radius:99px;background:#000a;font-size:16px}
+.qc{display:flex;flex-wrap:wrap;gap:10px}
+.qi{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 6px 0 14px;border:1px solid var(--ln);border-radius:99px}
+.qi label{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
+.qi input[type=checkbox]{width:20px;height:20px;accent-color:var(--ac)}
+.qi:has(input:checked){background:var(--acs);border-color:var(--ac)}
+.qn{width:64px;min-height:34px;padding:0 8px;border:1px solid var(--ln);border-radius:6px;text-align:center;background:var(--w)}
+.pig{border-top:1px solid var(--ln);padding:14px 0}
+.pig:first-of-type{border-top:0;padding-top:2px}
+.pig .lb{margin:0 0 10px;font-size:16px;font-weight:600;color:var(--ink)}
+.cl{width:100%;justify-content:space-between;background:var(--w);color:var(--ink);border:1px solid var(--ln);min-height:64px;font-size:19px;margin-bottom:10px;border-radius:12px}
+dialog{border:0;border-radius:14px;padding:22px;max-width:440px;box-shadow:0 10px 40px #0004;color:var(--ink)}
+dialog::backdrop{background:#0008}
+dialog p{margin:0 0 18px;font-size:18px}
+dialog .b{display:flex;gap:8px;justify-content:flex-end}
+#ed{position:fixed;inset:0;z-index:20;background:#22272e;display:flex;flex-direction:column}
+#ed[hidden]{display:none}
+.tb{display:flex;gap:6px;padding:8px 10px;flex-wrap:wrap;align-items:center;background:var(--w)}
+.tb i{width:1px;height:28px;background:var(--ln);margin:0 4px}
+.tb .sp{flex:1}
+.tb button.on:not(.sw){background:var(--acs);color:#00664d;border-color:var(--ac)}
+.sw{width:40px;min-height:40px;padding:0;border:3px solid var(--w);border-radius:99px;box-shadow:0 0 0 1px var(--ln)}
+.sw.on{box-shadow:0 0 0 3px var(--ac)}
+#ed .cv{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:10px}
+#ed canvas{background:#fff;max-width:100%;max-height:100%;touch-action:none}
+</style>
+</head><body>
+<header id="hd"></header>
+<nav id="nv" hidden></nav>
+<main id="mn"></main>
+<div id="ed" hidden>
+ <div class="tb">
+  <button class="sw on" data-c="#111" style="background:#111" aria-label="Noir"></button>
+  <button class="sw" data-c="#d62828" style="background:#d62828" aria-label="Rouge"></button>
+  <button class="sw" data-c="#1d4ed8" style="background:#1d4ed8" aria-label="Bleu"></button>
+  <i></i>
+  <button class="s on" data-s="1">Fin</button><button class="s" data-s="2.5">Épais</button>
+  <i></i>
+  <button class="s on" data-t="pen">Stylo</button><button class="s" data-t="text">Texte</button>
+  <i></i>
+  <button class="s" data-u="1">Annuler</button><button class="s d" data-x="1">Effacer</button>
+  <span class="sp"></span>
+  <button class="s" data-no="1">Fermer</button><button data-ok="1">Valider</button>
+ </div>
+ <div class="cv"><canvas></canvas></div>
+</div>
+<dialog id="dg"><form method="dialog"><p></p><div class="b"><button class="s" value="0">Annuler</button><button id="dgok" value="1"></button></div></form></dialog>
+<input type="file" id="fi" accept="image/*" capture="environment" hidden>
+<input type="file" id="fg" accept="image/*" hidden>
+<script>
+const T=l=>['t',l],Dt=l=>['d',l],R=(l,o)=>['r',l,o.split('|')],C=(l,o)=>['c',l,o.split('|')],Q=(l,o)=>['q',l,o.split('|')];
+const S=[
+{t:'Information site',f:[T("Donneur d'ordre : entreprise / nom"),T('Client livré / ville'),T('Adresse du site'),Dt('Date de la visite technique'),R('Accès au site','Facile|Modéré|Difficile'),T('Contact visite technique'),T("Personnes présentes à l'audit (entreprise, nom, fonction, email, tél.)"),T('Opportunité')]},
+{t:'Information Installateur',id:'inst',f:[T('Nom Installateur'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
+{t:'Parking',f:[T('Nom du parking'),T('Nombre de places à équiper'),T('Places standard (qté)'),T('Places PMR (qté)'),C('Véhicules concernés','Collaborateur|Visiteur|Public')]},
+{t:'Énergie électrique',f:[R('Type de tarif','Vert|Jaune (PDL C4)|Bleu (PDL C5)'),T('Puissance transfo (kVA)'),R('Régime de neutre','TNS|TNC|TT|IT'),T("Si IT : emplacement et dimensions du transformateur d'isolement"),T('Puissance souscrite (PDL C4) : code 110'),T('Puissance souscrite (PDL C4) : code 111'),T('Puissance souscrite (PDL C4) : code 112'),T('Puissance de soutirage (PDL C4) : code 160'),T('Puissance de soutirage (PDL C4) : code 161'),T('Puissance de soutirage (PDL C4) : code 162'),R('Augmentation de la puissance souscrite','Oui|Non'),R('Installation TD IRVE','Oui|TD CFO/CFA|TD CFO|TD CFA|Non'),T('Localisation de la barrette de terre')]},
+{t:'Bornes',f:[C('Puissance des bornes','7 kW|11 kW|22 kW|Autres'),T('Bornes existantes (qté par puissance)'),T('Bornes à installer (qté par puissance)'),T('Pré-équipements (qté par puissance)'),R('Coefficient de foisonnement','0,6|0,7|0,8|1'),T('Pose sur pied (qté)'),T('Pose murale (qté)'),C('Emplacement des bornes','Intérieur|Extérieur'),R('Communication des bornes','Oui|4G (bonne réception)|Non'),C('Type de communication','TD CFA existant|Nouveau TD CFA à créer|Liaison filaire|Carte SIM intégrée'),R('Manutention des bornes à prévoir','Oui|Non')]},
+{t:'Génie civil',f:[Q('Massifs à créer','TD IRVE|Borne|Potelet|Arceau|Panneau de signalisation'),Q('Chambres à prévoir','L1C|L2C|L1T|L2T|Autres'),Q('Tranchées (longueur en m)','Terre végétale|Enrobé|Béton'),T('Élagage (m)'),T('Percement (nbr)'),T('Bordure - dépose (m)'),T('Bordure - pose (m)'),T('Carottage (nbr)'),T('Panneaux de signalisation (qté)'),Q('Marquage au sol','1 Grand Logo VE Central|1 Grand Logo VE| 2 Petits Logos VE'),T('Ligne de stationnement (m)'),Q('Protection mécanique','Arceau|Stop roue|Potelet')]},
+{t:'Cheminement',f:[T('Pose CDC : dimensions / longueur (m)'),T('Pose CDC capoté : dimensions / longueur (m)'),T('Pose tube IRO : dimensions / longueur (m)'),T('Pose goulotte : dimensions / longueur (m)'),T('Longueur du cheminement (m)')]},
+{t:'Disjoncteur général',f:[T('Nombre de pôles'),T('Vigi : sensibilité (mA)'),T('Vigi : temporisation (ms)'),T('Réglage déclencheur - Io (A)'),T('Réglage déclencheur - Ir (A)'),T('Réglage déclencheur - Isd (A)')]},
+{t:'Reportage photos',photos:["Entrée du site","Origine de l'installation / compteur",'Disjoncteur général','Cheminement origine > TD IRVE','Cheminement TD IRVE > bornes','Emplacement des bornes','Schémas électriques existants'],f:[]},
+{t:'Coupure électrique',f:[R('Créneau','Heures ouvrées lun-ven 8h-12h / 14h-17h|Hors heures ouvrées, fériés, week-end|Autre'),T('Précisions'),T('Travaux à la charge du client')]},
+{t:'Plans du technicien',plan:1,f:[T('Notes pour le bureau d\'études')]}
+];
+const N=['Info_site','Parking','Energie','Borne','Genie_civil','Cheminement','Disjoncteur','Reportage','Coupure','Plans'];
+N.inst='Installateur';S.forEach((x,i)=>x.i=x.id||(i>1?i-1:i));
+let db={clients:['proto'],data:{}},cur=null,tm,tgt;
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slug=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+const fmtv=v=>Array.isArray(v)?v.join(', '):(v&&typeof v=='object')?Object.entries(v).map(([o,q])=>o+(q?' ('+q+')':'')).join(', '):(v||'');
+const D=()=>db.data[cur]??={v:{},m:{}};
+const idb=(m,k,v)=>new Promise(r=>{const o=indexedDB.open('irve',1);o.onupgradeneeded=()=>o.result.createObjectStore('k');o.onsuccess=()=>{const s=o.result.transaction('k',m=='get'?'readonly':'readwrite').objectStore('k'),q=m=='get'?s.get(k):m=='put'?s.put(v,k):s.delete(k);q.onsuccess=()=>r(q.result)}});
+const save=()=>{clearTimeout(tm);tm=setTimeout(()=>idb('put','db',db).then(()=>{const e=$('#st');if(e){e.textContent='Enregistré';setTimeout(()=>{e.textContent=''},2000)}}),400)};
+const I={sl:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="1"/><path d="M12 17v4M8 21h8"/></svg>',cam:'<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',img:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>',pen:'<svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>',trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',doc:'<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',box:'<svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4v9l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v9"/></svg>',back:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',go:'<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'};
+const ask=(msg,ok,danger)=>new Promise(r=>{const g=$('#dg'),b=$('#dgok');g.querySelector('p').textContent=msg;b.textContent=ok||'Confirmer';b.className=danger?'dz':'';g.returnValue='';g.onclose=()=>r(g.returnValue=='1');g.showModal()});
+const thumbs=k=>`<div class="th">${(D().m[k]||[]).map((m,i)=>`<div><img src="${m.u}" alt=""><button data-del="${k}|${i}" aria-label="Supprimer">×</button></div>`).join('')}</div>`;
+function render(){
+ const y=scrollY,hd=$('#hd'),mn=$('#mn'),nv=$('#nv');
+ if(!cur){nv.hidden=true;hd.innerHTML='<h1>Audit IRVE</h1>';
+  mn.innerHTML='<h2 class="hi">Clients</h2>'+db.clients.map(c=>`<button class="cl" data-cl="${esc(c)}">${esc(c)}${I.go}</button>`).join('')+'<button class="s" data-nc="1">+ Ajouter un client</button>';return}
+ hd.innerHTML=`<button class="t" data-home="1">${I.back}Clients</button><h1>${esc(cur)}</h1><span id="st"></span><button class="t d" data-reset="1">${I.trash}Réinitialiser</button><button class="s" data-pdf="1">${I.doc}PDF</button><button class="s" data-ppt="1">${I.sl}PPT</button><button data-zip="1">${I.box}Tout exporter</button>`;
+ nv.hidden=false;nv.innerHTML=S.map((s,i)=>`<a href="#s${i}">${s.t}</a>`).join('');
+ mn.innerHTML=S.map((s,i)=>{
+  if(s.photos)return `<section id="s${i}"><h2><span>${s.t}</span></h2>`+s.photos.map((lbl,j)=>{const k='rp'+s.i+'.'+j;
+    return `<div class="pig"><span class="lb">${lbl}</span><div class="row"><button class="s" data-ph="${k}">${I.cam}Photo</button><button class="s" data-gal="${k}">${I.img}Galerie</button></div>${thumbs(k)}</div>`}).join('')+'</section>';
+  return `<section id="s${i}"><h2><span>${s.t}</span>${s.plan?`<button class="s" data-plan="p${s.i}">${I.pen}Nouveau plan</button>`:''}<button class="s" data-ph="p${s.i}">${I.cam}Photo</button><button class="s" data-gal="p${s.i}">${I.img}Galerie</button></h2>${thumbs('p'+s.i)}<div class="fg">`+s.f.map((f,j)=>{const k=s.i+'.'+j,v=D().v[k];let h=`<span class="lb">${f[1]}</span>`;
+  if(f[0]=='t')h+=`<div class="row"><input type="text" data-k="${k}" value="${esc(v)}"><button class="s" data-ink="${k}" aria-label="Écrire au stylet">${I.pen}</button></div>`+thumbs(k);
+  else if(f[0]=='d')h+=`<input type="date" data-k="${k}" value="${esc(v)}">`;
+  else if(f[0]=='q'){const vv=v||{};h+=`<div class="qc">${f[2].map(o=>`<div class="qi"><label><input type="checkbox" data-qk="${k}" data-qo="${esc(o)}" ${vv[o]!=null?'checked':''}>${o}</label>${vv[o]!=null?`<input type="text" inputmode="numeric" class="qn" data-qn="${k}|${esc(o)}" value="${esc(vv[o])}" placeholder="Qté">`:''}</div>`).join('')}</div>`}
+  else h+=`<div class="op">${f[2].map(o=>`<label><input type="${f[0]=='r'?'radio':'checkbox'}" name="${k}" data-k="${k}" data-o="${esc(o)}" ${(f[0]=='r'?v==o:(v||[]).includes(o))?'checked':''}>${o}</label>`).join('')}</div>`;
+  return `<div class="${f[0]=='t'||f[0]=='d'?'':'wide'}">${h}</div>`}).join('')+'</div></section>'}).join('');
+ scrollTo(0,y)}
+function add(k,u,w,h,f){const m={u,w,h};if(f){m.id=Date.now()+Math.random().toString(36).slice(2,7);m.ext=(f.type.split('/')[1]||'jpg').replace('jpeg','jpg');idb('put','o:'+m.id,f)}(D().m[k]??=[]).push(m);save();render()}
+function edit(src,w,h,cb){
+ const o=$('#ed'),c=o.querySelector('canvas'),x=c.getContext('2d');o.hidden=false;o.querySelectorAll('.on').forEach(b=>b.classList.remove('on'));o.querySelectorAll('[data-c="#111"],[data-s="1"],[data-t="pen"]').forEach(b=>b.classList.add('on'));c.width=w;c.height=h;
+ x.fillStyle='#fff';x.fillRect(0,0,w,h);if(src)x.drawImage(src,0,0,w,h);
+ let col='#111',sz=Math.max(3,w/400),tool='pen',hist=[],dr=0,pen=0,lx,ly;
+ const P=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*w/r.width,(e.clientY-r.top)*h/r.height]},
+ snap=()=>{hist.push(x.getImageData(0,0,w,h));if(hist.length>15)hist.shift()};
+ c.onpointerdown=e=>{if(e.pointerType=='pen')pen=1;if(pen&&e.pointerType=='touch')return;[lx,ly]=P(e);
+  if(tool=='text'){const t=prompt('Texte :');if(t){snap();x.fillStyle=col;x.font=`bold ${sz*8}px "Segoe UI",sans-serif`;x.fillText(t,lx,ly)}return}
+  c.setPointerCapture(e.pointerId);snap();dr=1;x.fillStyle=col;x.beginPath();x.arc(lx,ly,sz/2,0,7);x.fill()};
+ c.onpointermove=e=>{if(!dr||(pen&&e.pointerType=='touch'))return;const[px,py]=P(e);x.strokeStyle=col;x.lineCap='round';
+  x.lineWidth=sz*(e.pointerType=='pen'&&e.pressure?e.pressure*1.6+.4:1);x.beginPath();x.moveTo(lx,ly);x.lineTo(px,py);x.stroke();lx=px;ly=py};
+ c.onpointerup=c.onpointercancel=()=>dr=0;
+ o.onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(d.c||d.s||d.t)o.querySelectorAll('[data-'+(d.c?'c':d.s?'s':'t')+']').forEach(x=>x.classList.toggle('on',x===b));if(d.c)col=d.c;if(d.s)sz=Math.max(3,w/400)*d.s;if(d.t)tool=d.t;
+  if(d.u&&hist.length)x.putImageData(hist.pop(),0,0);
+  if(d.x){snap();x.fillStyle='#fff';x.fillRect(0,0,w,h);if(src)x.drawImage(src,0,0,w,h)}
+  if(d.ok){cb(c.toDataURL('image/jpeg',.8),w,h);o.hidden=true}
+  if(d.no)ask('Fermer sans enregistrer ?','Fermer',1).then(y=>{if(y)o.hidden=true})}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cl],[data-nc],[data-home],[data-pdf],[data-zip],[data-ppt],[data-reset],[data-ph],[data-gal],[data-ink],[data-plan],[data-del]');if(!b)return;const d=b.dataset;
+ if(d.cl){cur=d.cl;render()}
+ if(d.nc){const n=prompt('Nom du client :');if(n&&!db.clients.includes(n)){db.clients.push(n);save();render()}}
+ if(d.home){cur=null;render()}
+ if(d.pdf)pdf();
+ if(d.zip)zipAll();
+ if(d.ppt)ppt();
+ if(d.ph){tgt=d.ph;$('#fi').click()}
+ if(d.gal){tgt=d.gal;$('#fg').click()}
+ if(d.ink)edit(null,1000,220,(u,w,h)=>add(d.ink,u,w,h));
+ if(d.plan)edit(null,1600,1100,(u,w,h)=>add(d.plan,u,w,h));
+ if(d.del){const[k,i]=d.del.split('|');ask('Supprimer cette image ?','Supprimer',1).then(y=>{if(y){const[m]=D().m[k].splice(i,1);if(m.id)idb('del','o:'+m.id);save();render()}})}
+ if(d.reset)ask('Réinitialiser le formulaire « '+cur+' » ? Toutes les réponses, photos (originaux compris), écritures et plans de ce client seront supprimés définitivement. Pensez à exporter avant.','Tout supprimer',1).then(async y=>{if(!y)return;for(const k in D().m)for(const m of D().m[k])if(m.id)await idb('del','o:'+m.id);delete db.data[cur];await idb('put','db',db);render();scrollTo(0,0)})});
+document.addEventListener('input',e=>{const t=e.target;
+ if(t.dataset.qn){const[k,o]=t.dataset.qn.split('|');(D().v[k]??={})[o]=t.value;save();return}
+ const k=t.dataset.k;if(!k)return;
+ if(t.type=='checkbox'){const a=D().v[k]??=[];t.checked?a.push(t.dataset.o):a.splice(a.indexOf(t.dataset.o),1)}
+ else if(t.type=='radio')D().v[k]=t.dataset.o;else D().v[k]=t.value;save()});
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset.qo)return;const k=t.dataset.qk,o=t.dataset.qo,ob=D().v[k]??={};
+ if(t.checked)ob[o]=ob[o]??''; else delete ob[o];save();render()});
+$('#fi').onchange=$('#fg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const im=new Image(),k=tgt;
+ im.onload=()=>{const s=Math.min(1,1280/Math.max(im.width,im.height));edit(im,Math.round(im.width*s),Math.round(im.height*s),(u,w,h)=>add(k,u,w,h,f))};
+ im.onerror=()=>alert('Format image non lisible.');im.src=URL.createObjectURL(f)};
+function mk(){
+ if(!window.jspdf)return alert('Le module PDF est indisponible : vérifier la connexion au premier chargement.');
+ const d=new window.jspdf.jsPDF('p','mm','a4'),W=180;let y=16;const pg=h=>{if(y+h>284){d.addPage();y=16}};
+ const img=m=>{let w=Math.min(W,m.w*.15),h=w*m.h/m.w;if(h>120){h=120;w=h*m.w/m.h}pg(h+3);d.addImage(m.u,'JPEG',15,y,w,h);y+=h+3};
+ d.setFont('helvetica','bold');d.setFontSize(16);d.text('Relevé Visite Technique IRVE',15,y);y+=7;
+ d.setFont('helvetica','normal');d.setFontSize(10);d.text('Client : '+cur+'   Date : '+new Date().toLocaleDateString('fr-FR'),15,y);y+=9;
+ S.forEach((s,i)=>{pg(30);d.setFillColor(16,35,58);d.rect(15,y-5,W,7,'F');d.setTextColor(255);d.setFont('helvetica','bold');d.setFontSize(11);d.text(s.t,17,y);d.setTextColor(0);y+=8;
+  if(s.photos){s.photos.forEach((lbl,j)=>{const k='rp'+s.i+'.'+j,ms=D().m[k]||[];if(!ms.length)return;
+   pg(6);d.setFont('helvetica','bold');d.setFontSize(10);d.text(lbl,15,y);y+=5;ms.forEach(img)});y+=4;return}
+  (D().m['p'+s.i]||[]).forEach(img);
+  s.f.forEach((f,j)=>{const k=s.i+'.'+j,v=fmtv(D().v[k]);
+   const tx=d.splitTextToSize(f[1]+' : '+(v||'-'),W);pg(tx.length*5+2);d.setFont('helvetica','normal');d.setFontSize(10);d.text(tx,15,y);y+=tx.length*5+1;(D().m[k]||[]).forEach(img)});y+=4});
+ return d}
+const fn=()=>'Audit_IRVE_'+cur+'_'+new Date().toISOString().slice(0,10);
+const dl=(b,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)};
+const pdf=()=>{const d=mk();if(d)dl(d.output('blob'),fn()+'.pdf')};
+async function zipAll(){
+ const d=mk();if(!d)return;if(!window.JSZip)return alert('Module ZIP indisponible : vérifier la connexion au premier chargement.');
+ const z=new JSZip();z.file(fn()+'.pdf',d.output('blob'));const pp=await mkppt();if(pp)z.file(fn()+'.pptx',await pp.write({outputType:'blob'}));
+ for(const x of S){
+  if(x.photos){for(let j=0;j<x.photos.length;j++){const k='rp'+x.i+'.'+j,nm=slug(x.photos[j]);let n=0;
+    for(const m of D().m[k]||[]){if(!m.id)continue;const o=await idb('get','o:'+m.id);if(o)z.file('Photos_originales/'+nm+'_'+(++n)+'.'+m.ext,o)}}continue}
+  let n=0;for(const m of D().m['p'+x.i]||[]){if(!m.id)continue;const o=await idb('get','o:'+m.id);if(o)z.file('Photos_originales/'+N[x.i]+'_'+(++n)+'.'+m.ext,o)}}
+ dl(await z.generateAsync({type:'blob'}),fn()+'.zip')}
+const FOOT='IZIVIA Classification : C1 - Interne';
+const ft=sl=>sl.addText(FOOT,{x:9.3,y:7.1,w:3.9,h:.3,fontSize:9,align:'right',fontFace:'Calibri'});
+const fit=(iw,ih,bx,by,bw,bh)=>{const r=Math.min(bw/iw,bh/ih),w=iw*r,h=ih*r;return{x:bx+(bw-w)/2,y:by+(bh-h)/2,w,h}};
+async function pimg(m){
+ if(m.id)try{const b=await idb('get','o:'+m.id),u=URL.createObjectURL(b),im=await new Promise((r,j)=>{const i=new Image();i.onload=()=>r(i);i.onerror=j;i.src=u});
+  const k=Math.min(1,1920/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.round(im.naturalWidth*k),h=Math.round(im.naturalHeight*k),c=document.createElement('canvas');
+  c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);URL.revokeObjectURL(u);return{u:c.toDataURL('image/jpeg',.85),w,h}}catch(e){}
+ return m}
+async function mkppt(){
+ if(!window.PptxGenJS)return alert("Le module PowerPoint n'a pas pu se charger (pas de connexion au premier chargement, ou réseau qui bloque le site de la bibliothèque).");
+ const p=new PptxGenJS(),B='4472C4',today=new Date().toLocaleDateString('fr-FR'),F=v=>v?v.split('-').reverse().join('/'):'';
+ p.layout='LAYOUT_WIDE';
+ const V=(a,j)=>fmtv(D().v[a+'.'+j]);
+ const H=t=>[{text:t,options:{colspan:2,bold:true,color:'FFFFFF',fill:{color:B}}}],R=(l,v)=>[l,{text:v,options:{bold:true}}];
+ const dv=t=>{const sl=p.addSlide();sl.addText(t,{x:0,y:3,w:13.33,h:1.2,align:'center',fontSize:44,color:B,fontFace:'Calibri'});ft(sl)};
+ const tb=r=>{const sl=p.addSlide();sl.addTable(r,{x:.5,y:.4,w:12.3,colW:[5.3,7],fontFace:'Calibri',fontSize:12,border:{type:'solid',color:'000000',pt:1},valign:'middle',margin:.06});ft(sl)};
+ let sl=p.addSlide();
+ sl.addText(cur,{x:.7,y:1,w:12,h:1,fontSize:40,bold:true,color:B,fontFace:'Calibri'});
+ sl.addText('Avant-Projet Sommaire (APS)',{x:.7,y:2.1,w:12,h:.8,fontSize:30,color:'001B6E',fontFace:'Calibri'});
+ sl.addText([['Site',V(0,1)],['Adresse',V(0,2)],['Rédacteur',V('inst',0)],['Mail',V('inst',1)],['Num',V('inst',2)],['Version',V('inst',3)],['Date',today]].map(([a,b])=>({text:a+' : '+b,options:{breakLine:true}})),{x:.7,y:3.2,w:12,h:3.4,fontSize:20,fontFace:'Calibri',valign:'top'});ft(sl);
+ sl=p.addSlide();sl.addText('Sommaire',{x:.45,y:.4,w:8,h:1,fontSize:44,color:'001B6E',fontFace:'Calibri Light'});
+ ['Synthèse du projet','Descriptif du projet',"Plan d'implantation"].forEach((t,n)=>sl.addText(t,{x:.42+n*4.47,y:2.2,w:3.55,h:3.55,fill:{color:['001B6E','1257C7','118AFF'][n]},color:'FFFFFF',fontSize:28,fontFace:'Calibri Light',align:'center',valign:'middle'}));ft(sl);
+ dv('Synthèse du projet');
+ tb([H('INFORMATIONS GENERALES'),R('Nom du site',V(0,1)),R('Adresse du site',V(0,2)),R('Date de la visite technique',F(V(0,3))),R('Opportunité',V(0,7)),
+  H('NOMBRES ET TYPES DE POINTS DE CHARGE'),R('Puissance des bornes',V(3,0)),R('Bornes à installer',V(3,2)),
+  H('INTERLOCUTEURS'),R('Interlocuteur installateur',[V('inst',0),V('inst',1),V('inst',2)].filter(Boolean).join(' - ')),R('Interlocuteur client',V(0,5)),R('Autres personnes présentes',V(0,6))]);
+ dv('Descriptif du projet');
+ tb([H('SPECIFICITES DU SITE'),R("Accès au site",V(0,4)),R('Coupure électrique',V(8,0)),R('Véhicules concernés',V(1,2)),
+  H('POINT DE RACCORDEMENT CFO'),R('Type de tarif',V(2,0)),R('Régime de neutre',V(2,2)),R('Puissance souscrite',V(2,4)),R('Puissance de soutirage',V(2,5)),R('Augmentation de la puissance souscrite',V(2,6)),
+  H('POINT DE RACCORDEMENT CFA'),R('Communication des bornes',V(3,7)),R('Type de communication',V(3,8)),
+  H('PRECISIONS COMPLEMENTAIRES'),R('Coupure / précisions',V(8,1)),R('Travaux à la charge du client',V(8,2))]);
+ dv("Plan d'implantation");
+ for(const x of S){const ms=D().m['p'+x.i]||[];
+  for(let a=0;a<ms.length;a+=6){const g=ms.slice(a,a+6),c=g.length<2?1:g.length<5?2:3,r=Math.ceil(g.length/c),W=12.3/c,Hh=5.8/r,sl2=p.addSlide();
+   sl2.addText(x.t+(ms.length>6?' ('+(a/6+1)+')':''),{x:.5,y:.3,w:12.3,h:.7,fontSize:30,color:B,fontFace:'Calibri'});
+   (await Promise.all(g.map(pimg))).forEach((m,n)=>{const f=fit(m.w,m.h,.5+(n%c)*W+.05,1.15+Math.floor(n/c)*Hh+.05,W-.1,Hh-.1);sl2.addImage({data:m.u.slice(5),...f})});ft(sl2)}}
+ return p}
+const ppt=async()=>{const q=await mkppt();if(q)dl(await q.write({outputType:'blob'}),fn()+'.pptx')};
+idb('get','db').then(v=>{if(v)db=v;render()});
+</script></body></html>
