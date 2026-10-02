@@ -69,26 +69,96 @@ dialog .b{display:flex;gap:8px;justify-content:flex-end}
 .sw.on{box-shadow:0 0 0 3px var(--ac)}
 #ed .cv{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:10px}
 #ed canvas{background:#fff;max-width:100%;max-height:100%;touch-action:none}
+
+#ed .edbar{display:flex;gap:8px;align-items:center;padding:8px 10px;background:var(--w);border-bottom:1px solid var(--ln);box-shadow:0 1px 3px #0001;z-index:2}
+#ed .ed-title{font-size:15px;font-weight:700;color:var(--ink)}
+#ed .edbar .sp{flex:1}
+#toolsToggle svg{transition:transform .18s ease}
+#toolsToggle[aria-expanded="true"] svg{transform:rotate(180deg)}
+.tool-drawer{display:flex;align-items:stretch;gap:12px;overflow-x:auto;padding:10px;background:#f7f9fa;border-bottom:1px solid var(--ln);box-shadow:0 3px 8px #0000000d;z-index:1}
+.tool-drawer[hidden]{display:none}
+.tool-group{display:flex;align-items:center;gap:6px;padding-right:12px;border-right:1px solid var(--ln);flex:none}
+.tool-group:last-child{padding-right:0;border-right:0}
+.tool-label{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--mut);text-transform:uppercase;margin-right:2px;white-space:nowrap}
+.tool-drawer button{min-height:40px;font-size:14px;padding:0 11px;white-space:nowrap}
+.tool-drawer .sw{width:40px;padding:0}
+.zoom-read{min-width:48px;text-align:center;font-size:13px;font-weight:700;color:var(--mut);font-variant-numeric:tabular-nums}
+#ed .cv{position:relative;display:block;overflow:hidden;flex:1;min-height:0;padding:0;background:#20262d;isolation:isolate}
+#ed canvas{position:absolute;top:0;left:0;background:#fff;max-width:none;max-height:none;touch-action:none;transform-origin:0 0;box-shadow:0 4px 18px #0008}
+#ed[data-tool="cursor"] canvas{cursor:grab}
+#ed .cv.panning canvas{cursor:grabbing}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+@media (max-width:700px){
+ body{font-size:16px}
+ header{position:static;flex-wrap:wrap;padding:8px 12px;gap:6px}
+ header h1{order:-1;flex:1 1 55%;font-size:17px}
+ #hd button{min-height:40px;padding:0 10px;font-size:14px}
+ nav{position:static;padding:8px 12px}
+ main{padding:6px 12px 32px}
+ section{padding:14px 14px 16px;border-radius:10px;margin-bottom:12px;scroll-margin-top:8px}
+ .hi{font-size:20px;margin:12px 0 10px}
+ .fg{grid-template-columns:1fr;gap:0}
+ .wide{grid-column:auto}
+ .op{gap:6px}
+ .op label{min-height:42px;padding:0 13px}
+ .qc{gap:7px}
+ .qi{flex:1 1 100%;justify-content:space-between;padding-left:12px}
+ .pig .row{flex-wrap:wrap}
+ .pig .row button{flex:1 1 132px}
+ .th img{height:80px}
+ #ed .edbar{flex-wrap:wrap;padding:8px}
+ #ed .ed-title{display:none}
+ #ed .edbar .sp{display:none}
+ #toolsToggle{flex:1 1 auto}
+ #ed .edbar [data-no="1"]{margin-left:auto}
+ .tool-drawer{gap:0;display:grid;grid-template-columns:1fr 1fr;padding:8px;overflow-y:auto}
+ .tool-group{min-width:0;flex-wrap:wrap;align-content:center;padding:8px;border-right:0;border-bottom:1px solid var(--ln)}
+ .tool-group:nth-last-child(-n+2){border-bottom:0}
+ .tool-group .tool-label{flex-basis:100%}
+ .tool-drawer button{min-height:40px;padding:0 9px}
+ .tool-group--tools{grid-column:1/-1}
+ .tool-group--tools button{flex:1 1 108px}
+ .tool-group--actions{grid-column:1/-1}
+ .tool-group--actions button{flex:1}
+}
+@media (max-width:410px){
+ #hd [data-reset]{margin-left:auto}
+ #ed .edbar [data-no="1"]{font-size:0;min-width:42px;padding:0}
+ #ed .edbar [data-no="1"] svg{display:block}
+ .tool-drawer{grid-template-columns:1fr}
+ .tool-group:nth-last-child(-n+2){border-bottom:1px solid var(--ln)}
+ .tool-group:last-child{border-bottom:0}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head><body>
 <header id="hd"></header>
 <nav id="nv" hidden></nav>
 <main id="mn"></main>
-<div id="ed" hidden>
- <div class="tb">
-  <button class="sw on" data-c="#111" style="background:#111" aria-label="Noir"></button>
-  <button class="sw" data-c="#d62828" style="background:#d62828" aria-label="Rouge"></button>
-  <button class="sw" data-c="#1d4ed8" style="background:#1d4ed8" aria-label="Bleu"></button>
-  <i></i>
-  <button class="s on" data-s="1">Fin</button><button class="s" data-s="2.5">Épais</button>
-  <i></i>
-  <button class="s on" data-t="pen">Stylo</button><button class="s" data-t="text">Texte</button>
-  <i></i>
-  <button class="s" data-u="1">Annuler</button><button class="s d" data-x="1">Effacer</button>
-  <span class="sp"></span>
-  <button class="s" data-no="1">Fermer</button><button data-ok="1">Valider</button>
+<div id="ed" hidden data-tool="pen" aria-label="Éditeur d'image">
+ <div class="edbar">
+  <button id="toolsToggle" class="s" data-tools="1" aria-controls="toolsDrawer" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg>Outils d’annotation</button>
+  <span class="ed-title">Annotation de l’image</span><span class="sp"></span>
+  <button class="s" data-no="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Fermer</span></button><button data-ok="1">Enregistrer</button>
  </div>
- <div class="cv"><canvas></canvas></div>
+ <div id="toolsDrawer" class="tool-drawer" hidden aria-label="Outils d'annotation">
+  <div class="tool-group" role="group" aria-label="Couleur"><span class="tool-label">Couleur</span>
+   <button class="sw on" data-c="#111" style="background:#111" aria-label="Noir"></button><button class="sw" data-c="#d62828" style="background:#d62828" aria-label="Rouge"></button><button class="sw" data-c="#1d4ed8" style="background:#1d4ed8" aria-label="Bleu"></button>
+  </div>
+  <div class="tool-group" role="group" aria-label="Épaisseur"><span class="tool-label">Trait</span>
+   <button class="s on" data-s="1">Fin</button><button class="s" data-s="2.5">Épais</button>
+  </div>
+  <div class="tool-group tool-group--tools" role="group" aria-label="Outils"><span class="tool-label">Outil</span>
+   <button class="s on" data-t="pen">Stylo</button><button class="s" data-t="line">Ligne</button><button class="s" data-t="square">Carré</button><button class="s" data-t="arrow">Flèche</button><button class="s" data-t="circle">Cercle</button><button class="s" data-t="text">Texte</button><button class="s" data-t="cursor">Curseur / déplacer</button>
+  </div>
+  <div class="tool-group" role="group" aria-label="Zoom"><span class="tool-label">Zoom</span>
+   <button class="s" data-z="out" aria-label="Zoom arrière">−</button><span id="zoomRead" class="zoom-read" aria-live="polite">100 %</span><button class="s" data-z="in" aria-label="Zoom avant">+</button><button class="s" data-z="reset">Ajuster</button>
+  </div>
+  <div class="tool-group tool-group--actions" role="group" aria-label="Actions"><span class="tool-label">Modifier</span>
+   <button class="s" data-u="1">Annuler</button><button class="s d" data-x="1">Réinitialiser</button>
+  </div>
+ </div>
+ <div class="cv"><canvas aria-label="Image à annoter"></canvas></div>
 </div>
 <dialog id="dg"><form method="dialog"><p></p><div class="b"><button class="s" value="0">Annuler</button><button id="dgok" value="1"></button></div></form></dialog>
 <input type="file" id="fi" accept="image/*" capture="environment" hidden>
@@ -97,7 +167,7 @@ dialog .b{display:flex;gap:8px;justify-content:flex-end}
 const T=l=>['t',l],Dt=l=>['d',l],R=(l,o)=>['r',l,o.split('|')],C=(l,o)=>['c',l,o.split('|')],Q=(l,o)=>['q',l,o.split('|')],Sel=(l,o)=>['s',l,o.split('|')];
 const S=[
 {t:'Information site',f:[T("Donneur d'ordre : entreprise / nom"),T('Client livré / ville'),T('Adresse du site'),Dt('Date de la visite technique'),R('Accès au site','Facile|Modéré|Difficile'),T('Contact visite technique'),T("Personnes présentes à l'audit (entreprise, nom, fonction, email, tél.)"),T('Opportunité')]},
-{t:'Information Installateur',id:'inst',f:[Sel('Nom Installateur','Benoit SMOLEN|Benjamin MOUTON|Romuald TURLUT|Serkan ERDOGAN'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
+{t:'Information Installateur',id:'inst',f:[Sel('Nom Installateur','Benoit|Benjamin|Romuald|Serkan'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
 {t:'Parking',f:[T('Nom du parking'),T('Nombre de places à équiper'),T('Places standard (qté)'),T('Places PMR (qté)'),C('Véhicules concernés','Collaborateur|Visiteur|Public')]},
 {t:'Énergie électrique',f:[R('Type de tarif','Vert|Jaune (PDL C4)|Bleu (PDL C5)'),T('Puissance transfo (kVA)'),R('Régime de neutre','TNS|TNC|TT|IT'),T("Si IT : emplacement et dimensions du transformateur d'isolement"),T('Puissance souscrite (PDL C4) : code 110'),T('Puissance souscrite (PDL C4) : code 111'),T('Puissance souscrite (PDL C4) : code 112'),T('Puissance de soutirage (PDL C4) : code 160'),T('Puissance de soutirage (PDL C4) : code 161'),T('Puissance de soutirage (PDL C4) : code 162'),R('Augmentation de la puissance souscrite','Oui|Non'),R('Installation TD IRVE','Oui|TD CFO/CFA|TD CFO|TD CFA|Non'),T('Localisation de la barrette de terre')]},
 {t:'Bornes',f:[C('Puissance des bornes','7 kW|11 kW|22 kW|Autres'),T('Bornes existantes (qté par puissance)'),T('Bornes à installer (qté par puissance)'),T('Pré-équipements (qté par puissance)'),R('Coefficient de foisonnement','0,6|0,7|0,8|1'),T('Pose sur pied (qté)'),T('Pose murale (qté)'),C('Emplacement des bornes','Intérieur|Extérieur'),R('Communication des bornes','Oui|4G (bonne réception)|Non'),C('Type de communication','TD CFA existant|Nouveau TD CFA à créer|Liaison filaire|Carte SIM intégrée'),R('Manutention des bornes à prévoir','Oui|Non')]},
@@ -112,7 +182,7 @@ const N=['Info_site','Parking','Energie','Borne','Genie_civil','Cheminement','Di
 N.inst='Installateur';S.forEach((x,i)=>x.i=x.id||(i>1?i-1:i));
 // Coordonnées par installateur : à compléter par A (mail, num). Le choix du nom en 3
 // (Information Installateur) préremplit automatiquement ces deux champs sur le formulaire.
-const INST={'Benoit SMOLEN':{mail:'benoit.smolen@ensio.eu',num:'06 31 27 40 30'},"Benjamin MOUTON":{mail:'benjamin.mouton@ensio.eu',num:''},"Romuald TURLUT":{mail:'romuald.turlut@ensio.eu',num:'07 71 35 39 80'},'Serkan ERDOGAN':{mail:'Serkan.Erdogan@ensio.eu',num:'07 85 93 27 56'}};
+const INST={Benoit:{mail:'',num:''},Benjamin:{mail:'',num:''},Romuald:{mail:'',num:''},Serkan:{mail:'',num:''}};
 let db={clients:['50five','Amara Net Zero France','Bump','Cap Borne','Charge Expert','DKV','E55C','Edenred','Freshmile','Izivia','Mahle','Modulo','Renault','Time2Plug','Total','Watt','We Connect','We-Online','Ze Watt'],data:{}},cur=null,tm,tgt;
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
@@ -142,23 +212,48 @@ function render(){
  scrollTo(0,y)}
 function add(k,u,w,h,f){const m={u,w,h};if(f){m.id=Date.now()+Math.random().toString(36).slice(2,7);m.ext=(f.type.split('/')[1]||'jpg').replace('jpeg','jpg');idb('put','o:'+m.id,f)}(D().m[k]??=[]).push(m);save();render()}
 function edit(src,w,h,cb){
- const o=$('#ed'),c=o.querySelector('canvas'),x=c.getContext('2d');o.hidden=false;o.querySelectorAll('.on').forEach(b=>b.classList.remove('on'));o.querySelectorAll('[data-c="#111"],[data-s="1"],[data-t="pen"]').forEach(b=>b.classList.add('on'));c.width=w;c.height=h;
+ const o=$('#ed'),c=o.querySelector('canvas'),x=c.getContext('2d'),view=o.querySelector('.cv'),drawer=$('#toolsDrawer'),toggle=$('#toolsToggle'),zoomRead=$('#zoomRead');
+ if(o._resize)window.removeEventListener('resize',o._resize);o.hidden=false;drawer.hidden=true;toggle.setAttribute('aria-expanded','false');
+ o.querySelectorAll('.on').forEach(b=>b.classList.remove('on'));o.querySelectorAll('[data-c="#111"],[data-s="1"],[data-t="pen"]').forEach(b=>b.classList.add('on'));c.width=w;c.height=h;
  x.fillStyle='#fff';x.fillRect(0,0,w,h);if(src)x.drawImage(src,0,0,w,h);
- let col='#111',sz=Math.max(3,w/400),tool='pen',hist=[],dr=0,pen=0,lx,ly;
+ let col='#111',sz=Math.max(3,w/400),tool='pen',hist=[],dr='',pen=0,lx=0,ly=0,sx=0,sy=0,shapeBase=null,zoom=1,fit=1,panX=0,panY=0,panStart=null;
  const P=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*w/r.width,(e.clientY-r.top)*h/r.height]},
- snap=()=>{hist.push(x.getImageData(0,0,w,h));if(hist.length>15)hist.shift()};
- c.onpointerdown=e=>{if(e.pointerType=='pen')pen=1;if(pen&&e.pointerType=='touch')return;[lx,ly]=P(e);
+  snap=()=>{hist.push(x.getImageData(0,0,w,h));if(hist.length>15)hist.shift()},
+  close=()=>{if(o._resize)window.removeEventListener('resize',o._resize);o.hidden=true},
+  clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ const renderView=(center=false)=>{const r=view.getBoundingClientRect();fit=Math.min((r.width-24)/w,(r.height-24)/h,1);const scale=fit*zoom;
+  if(center){panX=(r.width-w*scale)/2;panY=(r.height-h*scale)/2}
+  c.style.transform=`translate(${panX}px,${panY}px) scale(${scale})`;zoomRead.textContent=Math.round(zoom*100)+' %'};
+ const setZoom=(next,center=true)=>{zoom=clamp(next,.5,4);renderView(center)};
+ const setTool=t=>{tool=t;o.dataset.tool=t;o.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));c.style.cursor=t=='cursor'?'grab':'crosshair'};
+ const drawShape=(kind,ax,ay,bx,by)=>{x.save();x.strokeStyle=col;x.lineWidth=sz;x.lineCap='round';x.lineJoin='round';
+  if(kind=='line'){x.beginPath();x.moveTo(ax,ay);x.lineTo(bx,by);x.stroke()}
+  if(kind=='square'){const side=Math.max(Math.abs(bx-ax),Math.abs(by-ay)),dx=(bx>=ax?side:-side),dy=(by>=ay?side:-side);x.strokeRect(ax,ay,dx,dy)}
+  if(kind=='circle'){const r=Math.hypot(bx-ax,by-ay);x.beginPath();x.arc(ax,ay,r,0,Math.PI*2);x.stroke()}
+  if(kind=='arrow'){const a=Math.atan2(by-ay,bx-ax),head=Math.max(18,sz*5);x.beginPath();x.moveTo(ax,ay);x.lineTo(bx,by);x.lineTo(bx-head*Math.cos(a-Math.PI/6),by-head*Math.sin(a-Math.PI/6));x.moveTo(bx,by);x.lineTo(bx-head*Math.cos(a+Math.PI/6),by-head*Math.sin(a+Math.PI/6));x.stroke()}
+  x.restore()};
+ const finish=e=>{if(!dr)return;if(dr=='pan')view.classList.remove('panning');dr='';shapeBase=null;panStart=null;if(e&&c.hasPointerCapture(e.pointerId))c.releasePointerCapture(e.pointerId)};
+ o._resize=()=>renderView(false);window.addEventListener('resize',o._resize);requestAnimationFrame(()=>renderView(true));
+ c.onpointerdown=e=>{if(e.pointerType=='pen')pen=1;if(pen&&e.pointerType=='touch')return;[lx,ly]=P(e);sx=lx;sy=ly;
+  if(tool=='cursor'){c.setPointerCapture(e.pointerId);dr='pan';panStart={clientX:e.clientX,clientY:e.clientY,x:panX,y:panY};view.classList.add('panning');return}
   if(tool=='text'){const t=prompt('Texte :');if(t){snap();x.fillStyle=col;x.font=`bold ${sz*8}px "Segoe UI",sans-serif`;x.fillText(t,lx,ly)}return}
-  c.setPointerCapture(e.pointerId);snap();dr=1;x.fillStyle=col;x.beginPath();x.arc(lx,ly,sz/2,0,7);x.fill()};
- c.onpointermove=e=>{if(!dr||(pen&&e.pointerType=='touch'))return;const[px,py]=P(e);x.strokeStyle=col;x.lineCap='round';
-  x.lineWidth=sz*(e.pointerType=='pen'&&e.pressure?e.pressure*1.6+.4:1);x.beginPath();x.moveTo(lx,ly);x.lineTo(px,py);x.stroke();lx=px;ly=py};
- c.onpointerup=c.onpointercancel=()=>dr=0;
+  c.setPointerCapture(e.pointerId);snap();dr='draw';
+  if(tool=='pen'){x.fillStyle=col;x.beginPath();x.arc(lx,ly,sz/2,0,7);x.fill()}else shapeBase=x.getImageData(0,0,w,h)};
+ c.onpointermove=e=>{if(!dr||(pen&&e.pointerType=='touch'))return;
+  if(dr=='pan'){panX=panStart.x+e.clientX-panStart.clientX;panY=panStart.y+e.clientY-panStart.clientY;renderView(false);return}
+  const[px,py]=P(e);if(tool=='pen'){x.strokeStyle=col;x.lineCap='round';x.lineWidth=sz*(e.pointerType=='pen'&&e.pressure?e.pressure*1.6+.4:1);x.beginPath();x.moveTo(lx,ly);x.lineTo(px,py);x.stroke();lx=px;ly=py}
+  else if(shapeBase){x.putImageData(shapeBase,0,0);drawShape(tool,sx,sy,px,py)}};
+ c.onpointerup=e=>finish(e);c.onpointercancel=e=>finish(e);
+ view.onwheel=e=>{if(tool!='cursor')return;e.preventDefault();setZoom(zoom+(e.deltaY<0?.15:-.15),false)};
  o.onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
-  if(d.c||d.s||d.t)o.querySelectorAll('[data-'+(d.c?'c':d.s?'s':'t')+']').forEach(x=>x.classList.toggle('on',x===b));if(d.c)col=d.c;if(d.s)sz=Math.max(3,w/400)*d.s;if(d.t)tool=d.t;
+  if(d.tools){drawer.hidden=!drawer.hidden;toggle.setAttribute('aria-expanded',String(!drawer.hidden));return}
+  if(d.c||d.s||d.t){if(d.c){col=d.c;o.querySelectorAll('[data-c]').forEach(v=>v.classList.toggle('on',v===b))}if(d.s){sz=Math.max(3,w/400)*d.s;o.querySelectorAll('[data-s]').forEach(v=>v.classList.toggle('on',v===b))}if(d.t)setTool(d.t)}
+  if(d.z){if(d.z=='in')setZoom(zoom+.25);if(d.z=='out')setZoom(zoom-.25);if(d.z=='reset')setZoom(1)}
   if(d.u&&hist.length)x.putImageData(hist.pop(),0,0);
   if(d.x){snap();x.fillStyle='#fff';x.fillRect(0,0,w,h);if(src)x.drawImage(src,0,0,w,h)}
-  if(d.ok){cb(c.toDataURL('image/jpeg',.8),w,h);o.hidden=true}
-  if(d.no)ask('Fermer sans enregistrer ?','Fermer',1).then(y=>{if(y)o.hidden=true})}}
+  if(d.ok){cb(c.toDataURL('image/jpeg',.8),w,h);close()}
+  if(d.no)ask('Fermer sans enregistrer ?','Fermer',1).then(y=>{if(y)close()})}
+}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-cl],[data-nc],[data-home],[data-pdf],[data-zip],[data-ppt],[data-reset],[data-ph],[data-gal],[data-ras],[data-plan],[data-del]');if(!b)return;const d=b.dataset;
  if(d.cl){cur=d.cl;render()}
  if(d.nc){const n=prompt('Nom du client :');if(n&&!db.clients.includes(n)){db.clients.push(n);save();render()}}
