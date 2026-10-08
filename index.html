@@ -167,7 +167,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 const T=l=>['t',l],Dt=l=>['d',l],R=(l,o)=>['r',l,o.split('|')],C=(l,o)=>['c',l,o.split('|')],Q=(l,o)=>['q',l,o.split('|')],Sel=(l,o)=>['s',l,o.split('|')];
 const S=[
 {t:'Information site',f:[T("Donneur d'ordre : entreprise / nom"),T('Client livré / ville'),T('Adresse du site'),Dt('Date de la visite technique'),R('Accès au site','Facile|Modéré|Difficile'),T('Contact visite technique'),T("Personnes présentes à l'audit (entreprise, nom, fonction, email, tél.)"),T('Opportunité')]},
-{t:'Information Installateur',id:'inst',f:[Sel('Nom Installateur','Benoit|Benjamin|Romuald|Serkan'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
+{t:'Information Installateur',id:'inst',f:[Sel('Nom Installateur','Benoit SMOLEN|Benjamin MOUTON|Romuald TURLUT|Serkan ERDOGAN'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
 {t:'Parking',f:[T('Nom du parking'),T('Nombre de places à équiper'),T('Places standard (qté)'),T('Places PMR (qté)'),C('Véhicules concernés','Collaborateur|Visiteur|Public')]},
 {t:'Énergie électrique',f:[R('Type de tarif','Vert|Jaune (PDL C4)|Bleu (PDL C5)'),T('Puissance transfo (kVA)'),R('Régime de neutre','TNS|TNC|TT|IT'),T("Si IT : emplacement et dimensions du transformateur d'isolement"),T('Puissance souscrite (PDL C4) : code 110'),T('Puissance souscrite (PDL C4) : code 111'),T('Puissance souscrite (PDL C4) : code 112'),T('Puissance de soutirage (PDL C4) : code 160'),T('Puissance de soutirage (PDL C4) : code 161'),T('Puissance de soutirage (PDL C4) : code 162'),R('Augmentation de la puissance souscrite','Oui|Non'),R('Installation TD IRVE','Oui|TD CFO/CFA|TD CFO|TD CFA|Non'),T('Localisation de la barrette de terre')]},
 {t:'Bornes',f:[C('Puissance des bornes','7 kW|11 kW|22 kW|Autres'),T('Bornes existantes (qté par puissance)'),T('Bornes à installer (qté par puissance)'),T('Pré-équipements (qté par puissance)'),R('Coefficient de foisonnement','0,6|0,7|0,8|1'),T('Pose sur pied (qté)'),T('Pose murale (qté)'),C('Emplacement des bornes','Intérieur|Extérieur'),R('Communication des bornes','Oui|4G (bonne réception)|Non'),C('Type de communication','TD CFA existant|Nouveau TD CFA à créer|Liaison filaire|Carte SIM intégrée'),R('Manutention des bornes à prévoir','Oui|Non')]},
@@ -182,7 +182,7 @@ const N=['Info_site','Parking','Energie','Borne','Genie_civil','Cheminement','Di
 N.inst='Installateur';S.forEach((x,i)=>x.i=x.id||(i>1?i-1:i));
 // Coordonnées par installateur : à compléter par A (mail, num). Le choix du nom en 3
 // (Information Installateur) préremplit automatiquement ces deux champs sur le formulaire.
-const INST={Benoit:{mail:'',num:''},Benjamin:{mail:'',num:''},Romuald:{mail:'',num:''},Serkan:{mail:'',num:''}};
+const INST={'Benoit SMOLEN':{mail:'benoit.smolen@ensio.eu',num:'06 31 27 40 30'},"Benjamin MOUTON":{mail:'benjamin.mouton@ensio.eu',num:''},"Romuald TURLUT":{mail:'romuald.turlut@ensio.eu',num:'07 71 35 39 80'},'Serkan ERDOGAN':{mail:'Serkan.Erdogan@ensio.eu',num:'07 85 93 27 56'}};
 let db={clients:['50five','Amara Net Zero France','Bump','Cap Borne','Charge Expert','DKV','E55C','Edenred','Freshmile','Izivia','Mahle','Modulo','Renault','Time2Plug','Total','Watt','We Connect','We-Online','Ze Watt'],data:{}},cur=null,tm,tgt;
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
