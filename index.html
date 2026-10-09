@@ -149,8 +149,19 @@ N.inst='Installateur';S.forEach((x,i)=>x.i=x.id||(i>1?i-1:i));
 // Coordonnées par installateur : à compléter par A (mail, num). Le choix du nom en 3
 // (Information Installateur) préremplit automatiquement ces deux champs sur le formulaire.
 const INST={'Benoit SMOLEN':{mail:'benoit.smolen@ensio.eu',num:'06 31 27 40 30'},"Benjamin MOUTON":{mail:'benjamin.mouton@ensio.eu',num:''},"Romuald TURLUT":{mail:'romuald.turlut@ensio.eu',num:'07 71 35 39 80'},'Serkan ERDOGAN':{mail:'Serkan.Erdogan@ensio.eu',num:'07 85 93 27 56'}};
+// Gabarits PowerPoint par client : coller ici le lien "raw" GitHub de chaque fichier
+// (sur GitHub : ouvrir le .pptx -> bouton "Raw" -> copier l'URL). _default sert à
+// tous les clients sans gabarit dédié (« APS Client Ville 0XXXXVX.pptx »).
+const TEMPLATES={
+ 'BEEV':'',
+ 'BUMP':'',
+ 'DKV':'',
+ 'IZIVIA':'',
+ _default:''
+};
+const apsName=()=>{const parts=[cur,fmtv(D().v['0.1']),fmtv(D().v['0.7'])].filter(Boolean);return 'Aps '+parts.join(' ')+'.pptx'};
 const TOOLS=[{id:'irve',name:'Audit IRVE — Relevé visite technique'}];
-let app=null,db={clients:['50five','Amara NetZero France','Bump','Beev','Cap Borne','Charge Expert','DKV','E55C','Edenred','Freshmile','Izivia','Mahle','Modulo','Renault','Time2Plug','Total','Watt','We Connect','We-Online','Ze Watt'],data:{}},cur=null,tm,tgt;
+let app=null,db={clients:['50five','Amara Net Zero France','Bump','Beev','Cap Borne','Charge Expert','DKV','E55C','Edenred','Freshmile','Izivia','Mahle','Modulo','Renault','Time2Plug','Total','Watt','We Connect','We-Online','Ze Watt'],data:{}},cur=null,tm,tgt;
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
 const fmtv=v=>Array.isArray(v)?v.join(', '):(v&&typeof v=='object')?Object.entries(v).map(([o,q])=>o+(q?' ('+q+')':'')).join(', '):(v||'');
@@ -283,7 +294,7 @@ const dl=(b,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(
 const pdf=()=>{const d=mk();if(d)dl(d.output('blob'),fn()+'.pdf')};
 async function zipAll(){
  const d=mk();if(!d)return;if(!window.JSZip)return alert('Module ZIP indisponible : vérifier la connexion au premier chargement.');
- const z=new JSZip();z.file(fn()+'.pdf',d.output('blob'));const pp=await mkppt();if(pp)z.file(fn()+'.pptx',await pp.write({outputType:'blob'}));
+ const z=new JSZip();z.file(fn()+'.pdf',d.output('blob'));const pr=await buildPptBlob();if(pr)z.file(pr.name,pr.blob);
  for(const x of S){
   if(x.photos){for(let j=0;j<x.photos.length;j++){const k='rp'+x.i+'.'+j,nm=slug(x.photos[j]);let n=0;
     for(const m of D().m[k]||[]){if(!m.id)continue;const o=await idb('get','o:'+m.id);if(o)z.file('Photos_originales/'+nm+'_'+(++n)+'.'+m.ext,o)}}continue}
@@ -297,6 +308,57 @@ async function pimg(m){
   const k=Math.min(1,1920/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.round(im.naturalWidth*k),h=Math.round(im.naturalHeight*k),c=document.createElement('canvas');
   c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);URL.revokeObjectURL(u);return{u:c.toDataURL('image/jpeg',.85),w,h}}catch(e){}
  return m}
+// --- Ajout de diapos "photos & plans originaux" (non annotés) à la fin d'un gabarit .pptx existant ---
+async function pimgBytes(m){
+ try{let blob=m.id?await idb('get','o:'+m.id):null;if(!blob)blob=await (await fetch(m.u)).blob();
+  let ext=(blob.type.split('/')[1]||'jpeg').toLowerCase();if(ext=='jpg')ext='jpeg';if(!['jpeg','png'].includes(ext))ext='jpeg';
+  return{bytes:await blob.arrayBuffer(),ext}}
+ catch(e){const blob=await (await fetch(m.u)).blob();return{bytes:await blob.arrayBuffer(),ext:'jpeg'}}}
+async function appendPhotoSlides(buf){
+ const zip=await JSZip.loadAsync(buf);
+ const layoutPath=Object.keys(zip.files).find(p=>/^ppt\/slideLayouts\/slideLayout\d+\.xml$/.test(p));
+ if(!layoutPath)throw new Error('layout introuvable');
+ const layoutRel='../slideLayouts/'+layoutPath.split('/').pop();
+ const presXmlPath='ppt/presentation.xml',presRelsPath='ppt/_rels/presentation.xml.rels',ctPath='[Content_Types].xml';
+ let presXml=await zip.file(presXmlPath).async('string'),presRels=await zip.file(presRelsPath).async('string'),ct=await zip.file(ctPath).async('string');
+ const szm=presXml.match(/<p:sldSz[^>]*cx="(\d+)"[^>]*cy="(\d+)"/),EMUW=szm?+szm[1]:12192000,EMUH=szm?+szm[2]:6858000;
+ let maxSldId=Math.max(255,...[...presXml.matchAll(/<p:sldId[^>]*\bid="(\d+)"/g)].map(m=>+m[1]));
+ let maxRid=Math.max(0,...[...presRels.matchAll(/Id="rId(\d+)"/g)].map(m=>+m[1]));
+ let slideN=Math.max(0,...Object.keys(zip.files).filter(p=>/^ppt\/slides\/slide\d+\.xml$/.test(p)).map(p=>+p.match(/slide(\d+)\.xml/)[1]))+1;
+ let newSldIds='';
+ ['jpeg','png'].forEach(ext=>{if(!new RegExp('Extension="'+ext+'"').test(ct))ct=ct.replace('</Types>',`<Default Extension="${ext}" ContentType="image/${ext}"/></Types>`)});
+ const groups=[];
+ for(const x of S){if(x.photos)x.photos.forEach((lbl,j)=>groups.push({t:lbl,ms:D().m['rp'+x.i+'.'+j]||[]}));else groups.push({t:x.t,ms:D().m['p'+x.i]||[]})}
+ for(const g of groups){if(!g.ms.length)continue;
+  for(let a=0;a<g.ms.length;a+=6){
+   const chunk=g.ms.slice(a,a+6),imgs=await Promise.all(chunk.map(pimgBytes));
+   const sRid=++maxRid,sId=++maxSldId,sPath=`ppt/slides/slide${slideN}.xml`,sRelsPath=`ppt/slides/_rels/slide${slideN}.xml.rels`;
+   let rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdL" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="'+layoutRel+'"/>';
+   let shapes='';const c=imgs.length<2?1:imgs.length<5?2:3,r=Math.ceil(imgs.length/c),titleH=Math.round(EMUH*.12),cw=EMUW/c,ch=(EMUH-titleH)/r;
+   imgs.forEach((im,n)=>{const rid='rIdP'+n,mediaPath=`ppt/media/aps${slideN}_${n}.${im.ext}`;
+    zip.file(mediaPath,im.bytes);
+    rels+=`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/aps${slideN}_${n}.${im.ext}"/>`;
+    const x0=Math.round((n%c)*cw+cw*.05),y0=Math.round(titleH+Math.floor(n/c)*ch+ch*.05),w0=Math.round(cw*.9),h0=Math.round(ch*.9);
+    shapes+=`<p:pic><p:nvPicPr><p:cNvPr id="${10+n}" name="Img${n}"/><p:cNvPicPr/><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="${x0}" y="${y0}"/><a:ext cx="${w0}" cy="${h0}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`});
+   rels+='</Relationships>';
+   zip.file(sRelsPath,rels);
+   zip.file(sPath,`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/><p:sp><p:nvSpPr><p:cNvPr id="2" name="Titre"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:p><a:r><a:rPr lang="fr-FR" sz="2400" b="1"/><a:t>${esc(g.t)}</a:t></a:r></a:p></p:txBody></p:sp>${shapes}</p:spTree></p:cSld></p:sld>`);
+   ct=ct.replace('</Types>',`<Override PartName="/${sPath}" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/></Types>`);
+   presRels=presRels.replace('</Relationships>',`<Relationship Id="rId${sRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${slideN}.xml"/></Relationships>`);
+   newSldIds+=`<p:sldId id="${sId}" r:id="rId${sRid}"/>`;
+   slideN++}}
+ presXml=presXml.replace('</p:sldIdLst>',newSldIds+'</p:sldIdLst>');
+ zip.file(presXmlPath,presXml);zip.file(presRelsPath,presRels);zip.file(ctPath,ct);
+ return await zip.generateAsync({type:'blob'})}
+async function buildPptBlob(){
+ const name=apsName(),url=TEMPLATES[cur]||TEMPLATES._default;
+ if(url){try{
+   const r=await fetch(url);if(!r.ok)throw new Error('http '+r.status);
+   const blob=await appendPhotoSlides(await r.arrayBuffer());
+   return{blob,name}
+  }catch(e){alert("Gabarit PowerPoint du client introuvable (vérifiez le lien GitHub dans TEMPLATES et la connexion). Génération du modèle standard à la place.\n\n"+e)}}
+ const p=await mkppt();if(!p)return null;
+ return{blob:await p.write({outputType:'blob'}),name}}
 async function mkppt(){
  if(!window.PptxGenJS)return alert("Le module PowerPoint n'a pas pu se charger (pas de connexion au premier chargement, ou réseau qui bloque le site de la bibliothèque).");
  const p=new PptxGenJS(),B='4472C4',today=new Date().toLocaleDateString('fr-FR'),F=v=>v?v.split('-').reverse().join('/'):'';
@@ -326,6 +388,6 @@ async function mkppt(){
    sl2.addText(x.t+(ms.length>6?' ('+(a/6+1)+')':''),{x:.5,y:.3,w:12.3,h:.7,fontSize:30,color:B,fontFace:'Calibri'});
    (await Promise.all(g.map(pimg))).forEach((m,n)=>{const f=fit(m.w,m.h,.5+(n%c)*W+.05,1.15+Math.floor(n/c)*Hh+.05,W-.1,Hh-.1);sl2.addImage({data:m.u.slice(5),...f})});ft(sl2)}}
  return p}
-const ppt=async()=>{const q=await mkppt();if(q)dl(await q.write({outputType:'blob'}),fn()+'.pptx')};
+const ppt=async()=>{const r=await buildPptBlob();if(r)dl(r.blob,r.name)};
 idb('get','db').then(v=>{if(v)db=v;render()});
 </script></body></html>
