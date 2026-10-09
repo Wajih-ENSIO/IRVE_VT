@@ -154,10 +154,10 @@ const INST={'Benoit SMOLEN':{mail:'benoit.smolen@ensio.eu',num:'06 31 27 40 30'}
 // tous les clients sans gabarit dédié (« APS Client Ville 0XXXXVX.pptx »).
 const TEMPLATES={
  'Beev':'https://raw.githubusercontent.com/wajih-ENSIO/IRVE_VT/main/APS%20BEEV.pptx',
- 'Bump':'',
- 'DKV':'',
- 'Izivia':'',
- _default:''
+ 'Bump':'https://raw.githubusercontent.com/wajih-ENSIO/IRVE_VT/main/APS%20BUMP.pptx',
+ 'DKV':'https://raw.githubusercontent.com/wajih-ENSIO/IRVE_VT/main/APS%20DKV.pptx',
+ 'Izivia':'https://raw.githubusercontent.com/wajih-ENSIO/IRVE_VT/main/APS%20IZIVIA.pptx',
+ _default:'https://raw.githubusercontent.com/wajih-ENSIO/IRVE_VT/main/APS%20Client%20Ville%200XXXXVX.pptx'
 };
 const apsName=()=>{const parts=[cur,fmtv(D().v['0.1']),fmtv(D().v['0.7'])].filter(Boolean);return 'Aps '+parts.join(' ')+'.pptx'};
 const TOOLS=[{id:'irve',name:'Audit IRVE — Relevé visite technique'}];
