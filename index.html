@@ -150,7 +150,7 @@ N.inst='Installateur';S.forEach((x,i)=>x.i=x.id||(i>1?i-1:i));
 // (Information Installateur) préremplit automatiquement ces deux champs sur le formulaire.
 const INST={'Benoit SMOLEN':{mail:'benoit.smolen@ensio.eu',num:'06 31 27 40 30'},"Benjamin MOUTON":{mail:'benjamin.mouton@ensio.eu',num:''},"Romuald TURLUT":{mail:'romuald.turlut@ensio.eu',num:'07 71 35 39 80'},'Serkan ERDOGAN':{mail:'Serkan.Erdogan@ensio.eu',num:'07 85 93 27 56'}};
 const TOOLS=[{id:'irve',name:'Audit IRVE — Relevé visite technique'}];
-let app=null,db={clients:['50five','Amara Net Zero France','Bump','Beev','Cap Borne','Charge Expert','DKV','E55C','Edenred','Freshmile','Izivia','Mahle','Modulo','Renault','Time2Plug','Total','Watt','We Connect','We-Online','Ze Watt'],data:{}},cur=null,tm,tgt;
+let app=null,db={clients:['50five','Amara NetZero France','Bump','Beev','Cap Borne','Charge Expert','DKV','E55C','Edenred','Freshmile','Izivia','Mahle','Modulo','Renault','Time2Plug','Total','Watt','We Connect','We-Online','Ze Watt'],data:{}},cur=null,tm,tgt;
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
 const fmtv=v=>Array.isArray(v)?v.join(', '):(v&&typeof v=='object')?Object.entries(v).map(([o,q])=>o+(q?' ('+q+')':'')).join(', '):(v||'');
