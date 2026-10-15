@@ -151,13 +151,12 @@ const CR=[
 {t:'Informations connectivité',f:[R('Couverture GSM','Bonne|Moyenne|Faible'),R('Qualité signal WIFI','Bonne|Moyenne|Faible'),R('Ethernet disponible','Oui|Non'),T('WIFI (SSID / remarque)')]},
 {t:'Détails produit',f:[Sel('Type de produit','PBBM11T2S / UNO MONO|PBBM13T2S / UNO TRI|PBBM31T2SGM / VERSO MONO|PBBM33T2SGM / VERSO TRI'),T('N° Série'),R('Type installation','Intérieure|Extérieure'),T('Bridage de la borne')]},
 {t:'Informations électriques',f:[T('Résistance de terre (Ω, conforme ≤ 100)'),T('Tension Terre / Neutre'),R("Présence d'un délesteur déjà existant",'Oui|Non'),R('Gestion dynamique de puissance','TIC|Eastron|Aucune')]},
-{t:'Conformité électrique',f:[R('Protection individuelle de chaque point de charge par DDR ≤ 30 mA','Oui|Non'),R('Test du dispositif DDR satisfaisant (type A mono / type B tri+N ou équiv.)','Oui|Non'),['rt','Calibre du disjoncteur conforme à la puissance (20A/3,7kW, 40A/7,4kW, 20A4P/11kW, 40A4P/22kW)',['Oui','Non']],R('Section du câble adaptée au calibre du disjoncteur','Oui|Non'),R('Mesure de continuité point de charge / barrette de terre ≤ 2 Ω','Oui|Non'),R("Absence d'inversion entre neutre et phase",'Oui|Non')]},
+{t:'Conformité électrique',f:[R('Protection individuelle de chaque point de charge par DDR ≤ 30 mA','Oui|Non'),R('Test du dispositif DDR satisfaisant (type A mono / type B tri+N ou équiv.)','Oui|Non'),R('Calibre du disjoncteur conforme à la puissance (20A/3,7kW, 40A/7,4kW, 20A4P/11kW, 40A4P/22kW)','Oui|Non'),Sel('Calibre retenu','20A courbe C (3,7 kW)|40A courbe C (7,4 kW)|20A courbe C 4P (11 kW)|40A courbe C 4P (22 kW)'),R('Section du câble adaptée au calibre du disjoncteur','Oui|Non'),R('Mesure de continuité point de charge / barrette de terre ≤ 2 Ω','Oui|Non'),R("Absence d'inversion entre neutre et phase",'Oui|Non')]},
 {t:'Photos',photos:['Disjoncteur de protection',"Tableau électrique ouvert avant intervention",'Étiquette produit (gauche) et étiquette Quickguide',"Linky après installation — Puissance souscrite","Linky après installation — Puissance max atteinte (journée en cours)","Linky après installation — Puissance apparente en temps réel",'Mesure de terre — avant installation','Mesure de terre — après installation',"Commutateur rotatif à l'intérieur de la borne",'Matériel raccordé à la borne (gestion dynamique)','Matériel raccordé côté tableau (gestion dynamique)','Rapport de config après connexion WIFI (page rafraîchie)','Vue d\'ensemble tableau ouvert et des protections',"Vue d'ensemble borne ouverte et borne posée",'Borne en test de charge (simulateur ou VE)'],f:[]},
 {t:'Bilan Installation',f:[R("Différence constatée entre la VT et l'installation",'Oui|Non'),T('Si oui, lesquelles'),T('Autres commentaires')]},
- {t:'Signatures',f:[Sig('Signature client'),Sig('Signature installateur')]}
+{t:'Signatures',f:[Sig('Signature client'),Sig('Signature installateur')]}
 ];
 CR.forEach((x,i)=>x.i=x.id||i);
-const PROD={'PBBM11T2S':'UNO MONO','PBBM13T2S':'UNO TRI','PBBM31T2SGM':'VERSO MONO','PBBM33T2SGM':'VERSO TRI'};
 const PV=[
 {t:'Procès-verbal de fin de travaux',f:[T('Nom du client'),T('Adresse du chantier'),T('Objet des travaux'),T('Référence de la proposition ENSIO EST'),T('Référence de la commande client'),R('Réception','Sans réserve|Avec réserve'),T('Remarques éventuelles')]},
 {t:'Représentant Client',f:[T('Nom'),Dt('Date'),Sig('Signature')]},
@@ -215,8 +214,7 @@ function render(){
   else if(f[0]=='d')h+=`<input type="date" data-k="${k}" value="${esc(v)}">`;
   else if(f[0]=='s')h+=`<select data-k="${k}"><option value="">-</option>${f[2].map(o=>`<option ${v==o?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
   else if(f[0]=='sig'){const has=(D().m[k]||[]).length;h+=thumbs(k)+`<button class="s" data-sig="${k}">${I.pen}${has?'Re-signer':'Signer'}</button>`}
-  else if(f[0]=='rt'){h+=`<div class="op">${f[2].map(o=>`<label><input type="radio" name="${k}" data-k="${k}" data-o="${esc(o)}" ${v&&v.choice==o?'checked':''}>${o}</label>`).join('')}</div><label class="lb">Valeur du calibre (ex. 40 A)</label><input type="text" data-rtval="${k}" value="${esc(v&&v.value||'')}" placeholder="Saisir le calibre">`}
-   else if(f[0]=='q'){const vv=v||{};h+=`<div class="qc">${f[2].map(o=>`<div class="qi"><label><input type="checkbox" data-qk="${k}" data-qo="${esc(o)}" ${vv[o]!=null?'checked':''}>${o}</label>${vv[o]!=null?`<input type="text" inputmode="numeric" class="qn" data-qn="${k}|${esc(o)}" value="${esc(vv[o])}" placeholder="Qté">`:''}</div>`).join('')}</div>`}
+  else if(f[0]=='q'){const vv=v||{};h+=`<div class="qc">${f[2].map(o=>`<div class="qi"><label><input type="checkbox" data-qk="${k}" data-qo="${esc(o)}" ${vv[o]!=null?'checked':''}>${o}</label>${vv[o]!=null?`<input type="text" inputmode="numeric" class="qn" data-qn="${k}|${esc(o)}" value="${esc(vv[o])}" placeholder="Qté">`:''}</div>`).join('')}</div>`}
   else h+=`<div class="op">${f[2].map(o=>`<label><input type="${f[0]=='r'?'radio':'checkbox'}" name="${k}" data-k="${k}" data-o="${esc(o)}" ${(f[0]=='r'?v==o:(v||[]).includes(o))?'checked':''}>${o}</label>`).join('')}</div>`;
   return `<div class="${f[0]=='t'||f[0]=='d'?'':'wide'}">${h}</div>`}).join('')+'</div></section>'}).join('');
  scrollTo(0,y)}
@@ -301,10 +299,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-app],[data
  if(d.reset)ask('Réinitialiser le formulaire « '+cur+' » ? Toutes les réponses, photos (originaux compris), écritures et plans de ce client seront supprimés définitivement. Pensez à exporter avant.','Tout supprimer',1).then(async y=>{if(!y)return;for(const k in D().m)for(const m of D().m[k])if(m.id)await idb('del','o:'+m.id);delete db.data[cur];await idb('put','db',db);render();scrollTo(0,0)})});
 document.addEventListener('input',e=>{const t=e.target;
  if(t.dataset.qn){const[k,o]=t.dataset.qn.split('|');(D().v[k]??={})[o]=t.value;save();return}
- if(t.dataset.rtval){const k=t.dataset.rtval,ob=D().v[k]??={choice:'',value:''};ob.value=t.value;save();return}
  const k=t.dataset.k;if(!k)return;
  if(t.type=='checkbox'){const a=D().v[k]??=[];t.checked?a.push(t.dataset.o):a.splice(a.indexOf(t.dataset.o),1)}
- else if(t.type=='radio'){if(t.name==='5.2' && CR[5].f[2][0]==='rt'){D().v[k]??={choice:'',value:''};D().v[k].choice=t.dataset.o}else D().v[k]=t.dataset.o}else D().v[k]=t.value;save()});
+ else if(t.type=='radio')D().v[k]=t.dataset.o;else D().v[k]=t.value;save()});
 document.addEventListener('change',e=>{const t=e.target;
  if(t.dataset.qo){const k=t.dataset.qk,o=t.dataset.qo,ob=D().v[k]??={};if(t.checked)ob[o]=ob[o]??''; else delete ob[o];save();render();return}
  if(t.dataset.k=='inst.0'){const inf=INST[t.value];if(inf){D().v['inst.1']=inf.mail;D().v['inst.2']=inf.num}save();render()}});
@@ -439,7 +436,7 @@ function crTbl(rows){
 const crH=t=>new docx.Paragraph({text:t,heading:docx.HeadingLevel.HEADING_2,spacing:{before:320,after:120}});
 async function mkdocx(){
  if(!window.docx){alert("Le module Word n'a pas pu se charger (pas de connexion au premier chargement, ou réseau qui bloque le site de la bibliothèque).");return null}
- const V=(i,j)=>{const v=D().v[i+'.'+j];return v&&typeof v==='object'&&!Array.isArray(v)?[v.choice,v.value].filter(Boolean).join(' — '):fmtv(v)},prodCode=D().v['3.0'];
+ const V=(i,j)=>fmtv(D().v[i+'.'+j]);
  const children=[new docx.Paragraph({text:'Compte Rendu Installation',heading:docx.HeadingLevel.TITLE}),
   new docx.Paragraph({text:cur+' — '+new Date().toLocaleDateString('fr-FR'),spacing:{after:200}}),
   crH('Informations Intervention'),
@@ -449,7 +446,7 @@ async function mkdocx(){
   crH('Informations connectivité'),
   crTbl([['Couverture GSM',V(2,0)],['Qualité signal WIFI',V(2,1)],['Ethernet disponible',V(2,2)],['WIFI',V(2,3)]]),
   crH('Détails produit'),
-  crTbl([['Type de produit',String(V(3,0)||'').includes(' / ')?V(3,0):V(3,0)+(PROD[prodCode]?' / '+PROD[prodCode]:'')],['N° Série',V(3,1)],['Type installation',V(3,2)],['Bridage de la borne',V(3,3)]]),
+  crTbl([['Type de produit',V(3,0)],['N° Série',V(3,1)],['Type installation',V(3,2)],['Bridage de la borne',V(3,3)]]),
   crH('Informations électriques'),
   crTbl([['Résistance de terre (Ω)',V(4,0)],['Tension Terre / Neutre',V(4,1)],['Délesteur déjà existant',V(4,2)],['Gestion dynamique de puissance',V(4,3)]]),
   crH('Conformité électrique'),
@@ -462,7 +459,10 @@ async function mkdocx(){
  children.push(crH('Bilan Installation'));
  children.push(crTbl(CR[7].f.map((f,j)=>[f[1],V(7,j)])));
  children.push(crH('Signatures'));
- for(const [label,k] of [['Signature client','8.0'],['Signature installateur','8.1']]){children.push(new docx.Paragraph({children:[new docx.TextRun({text:label,bold:true})],spacing:{before:160,after:80}}));const ms=D().m[k]||[];if(ms.length){for(const m of ms)children.push(new docx.Paragraph({children:[await docImg(m)],alignment:docx.AlignmentType.CENTER,spacing:{after:120}}))}else children.push(new docx.Paragraph({text:'',spacing:{after:500}}))}
+ const sigSec=CR[8];
+ for(let j=0;j<sigSec.f.length;j++){const k='8.'+j,ms=D().m[k]||[];
+  children.push(new docx.Paragraph({children:[new docx.TextRun({text:sigSec.f[j][1],bold:true})],spacing:{before:160,after:60}}));
+  if(ms[0])children.push(new docx.Paragraph({children:[await docImg(ms[0])],spacing:{after:120}}))}
  return new docx.Document({sections:[{children}]})}
 const word=async()=>{const doc=await mkdocx();if(doc)dl(await docx.Packer.toBlob(doc),crfn()+'.docx')};
 async function crZip(){
