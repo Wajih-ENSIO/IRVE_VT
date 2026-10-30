@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Audit IRVE — CR Installation v2</title>
+<title>Audit IRVE</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-<script id="docxLib" src="https://cdn.jsdelivr.net/npm/docx@8.2.4/build/index.umd.js" onerror="window.__docxPrimaryFailed=true"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <style>
 :root{--ink:#14202e;--mut:#5d6b7a;--ac:#00926f;--acs:#e3f5ef;--bg:#f2f4f6;--ln:#d9dfe5;--w:#fff;--dg:#c0392b}
 *{box-sizing:border-box}
@@ -151,13 +151,12 @@ const CR=[
 {t:'Informations connectivité',f:[R('Couverture GSM','Bonne|Moyenne|Faible'),R('Qualité signal WIFI','Bonne|Moyenne|Faible'),R('Ethernet disponible','Oui|Non'),T('WIFI (SSID / remarque)')]},
 {t:'Détails produit',f:[Sel('Type de produit','PBBM11T2S / UNO MONO|PBBM13T2S / UNO TRI|PBBM31T2SGM / VERSO MONO|PBBM33T2SGM / VERSO TRI'),T('N° Série'),R('Type installation','Intérieure|Extérieure'),T('Bridage de la borne')]},
 {t:'Informations électriques',f:[T('Résistance de terre (Ω, conforme ≤ 100)'),T('Tension Terre / Neutre'),R("Présence d'un délesteur déjà existant",'Oui|Non'),R('Gestion dynamique de puissance','TIC|Eastron|Aucune')]},
-{t:'Conformité électrique',f:[R('Protection individuelle de chaque point de charge par DDR ≤ 30 mA','Oui|Non'),R('Test du dispositif DDR satisfaisant (type A mono / type B tri+N ou équiv.)','Oui|Non'),['rt','Calibre du disjoncteur conforme à la puissance (20A/3,7kW, 40A/7,4kW, 20A4P/11kW, 40A4P/22kW)',['Oui','Non']],R('Section du câble adaptée au calibre du disjoncteur','Oui|Non'),R('Mesure de continuité point de charge / barrette de terre ≤ 2 Ω','Oui|Non'),R("Absence d'inversion entre neutre et phase",'Oui|Non')]},
+{t:'Conformité électrique',f:[R('Protection individuelle de chaque point de charge par DDR ≤ 30 mA','Oui|Non'),R('Test du dispositif DDR satisfaisant (type A mono / type B tri+N ou équiv.)','Oui|Non'),R('Calibre du disjoncteur conforme à la puissance (20A/3,7kW, 40A/7,4kW, 20A4P/11kW, 40A4P/22kW)','Oui|Non'),Sel('Calibre retenu','20A courbe C (3,7 kW)|40A courbe C (7,4 kW)|20A courbe C 4P (11 kW)|40A courbe C 4P (22 kW)'),R('Section du câble adaptée au calibre du disjoncteur','Oui|Non'),R('Mesure de continuité point de charge / barrette de terre ≤ 2 Ω','Oui|Non'),R("Absence d'inversion entre neutre et phase",'Oui|Non')]},
 {t:'Photos',photos:['Disjoncteur de protection',"Tableau électrique ouvert avant intervention",'Étiquette produit (gauche) et étiquette Quickguide',"Linky après installation — Puissance souscrite","Linky après installation — Puissance max atteinte (journée en cours)","Linky après installation — Puissance apparente en temps réel",'Mesure de terre — avant installation','Mesure de terre — après installation',"Commutateur rotatif à l'intérieur de la borne",'Matériel raccordé à la borne (gestion dynamique)','Matériel raccordé côté tableau (gestion dynamique)','Rapport de config après connexion WIFI (page rafraîchie)','Vue d\'ensemble tableau ouvert et des protections',"Vue d'ensemble borne ouverte et borne posée",'Borne en test de charge (simulateur ou VE)'],f:[]},
 {t:'Bilan Installation',f:[R("Différence constatée entre la VT et l'installation",'Oui|Non'),T('Si oui, lesquelles'),T('Autres commentaires')]},
- {t:'Signatures',f:[Sig('Signature client'),Sig('Signature installateur')]}
+{t:'Signatures',f:[Sig('Signature client'),Sig('Signature installateur')]}
 ];
 CR.forEach((x,i)=>x.i=x.id||i);
-const PROD={'PBBM11T2S':'UNO MONO','PBBM13T2S':'UNO TRI','PBBM31T2SGM':'VERSO MONO','PBBM33T2SGM':'VERSO TRI'};
 const PV=[
 {t:'Procès-verbal de fin de travaux',f:[T('Nom du client'),T('Adresse du chantier'),T('Objet des travaux'),T('Référence de la proposition ENSIO EST'),T('Référence de la commande client'),R('Réception','Sans réserve|Avec réserve'),T('Remarques éventuelles')]},
 {t:'Représentant Client',f:[T('Nom'),Dt('Date'),Sig('Signature')]},
@@ -215,8 +214,7 @@ function render(){
   else if(f[0]=='d')h+=`<input type="date" data-k="${k}" value="${esc(v)}">`;
   else if(f[0]=='s')h+=`<select data-k="${k}"><option value="">-</option>${f[2].map(o=>`<option ${v==o?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
   else if(f[0]=='sig'){const has=(D().m[k]||[]).length;h+=thumbs(k)+`<button class="s" data-sig="${k}">${I.pen}${has?'Re-signer':'Signer'}</button>`}
-  else if(f[0]=='rt'){h+=`<div class="op">${f[2].map(o=>`<label><input type="radio" name="${k}" data-k="${k}" data-o="${esc(o)}" ${v&&v.choice==o?'checked':''}>${o}</label>`).join('')}</div><label class="lb">Valeur du calibre (ex. 40 A)</label><input type="text" data-rtval="${k}" value="${esc(v&&v.value||'')}" placeholder="Saisir le calibre">`}
-   else if(f[0]=='q'){const vv=v||{};h+=`<div class="qc">${f[2].map(o=>`<div class="qi"><label><input type="checkbox" data-qk="${k}" data-qo="${esc(o)}" ${vv[o]!=null?'checked':''}>${o}</label>${vv[o]!=null?`<input type="text" inputmode="numeric" class="qn" data-qn="${k}|${esc(o)}" value="${esc(vv[o])}" placeholder="Qté">`:''}</div>`).join('')}</div>`}
+  else if(f[0]=='q'){const vv=v||{};h+=`<div class="qc">${f[2].map(o=>`<div class="qi"><label><input type="checkbox" data-qk="${k}" data-qo="${esc(o)}" ${vv[o]!=null?'checked':''}>${o}</label>${vv[o]!=null?`<input type="text" inputmode="numeric" class="qn" data-qn="${k}|${esc(o)}" value="${esc(vv[o])}" placeholder="Qté">`:''}</div>`).join('')}</div>`}
   else h+=`<div class="op">${f[2].map(o=>`<label><input type="${f[0]=='r'?'radio':'checkbox'}" name="${k}" data-k="${k}" data-o="${esc(o)}" ${(f[0]=='r'?v==o:(v||[]).includes(o))?'checked':''}>${o}</label>`).join('')}</div>`;
   return `<div class="${f[0]=='t'||f[0]=='d'?'':'wide'}">${h}</div>`}).join('')+'</div></section>'}).join('');
  scrollTo(0,y)}
@@ -301,10 +299,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-app],[data
  if(d.reset)ask('Réinitialiser le formulaire « '+cur+' » ? Toutes les réponses, photos (originaux compris), écritures et plans de ce client seront supprimés définitivement. Pensez à exporter avant.','Tout supprimer',1).then(async y=>{if(!y)return;for(const k in D().m)for(const m of D().m[k])if(m.id)await idb('del','o:'+m.id);delete db.data[cur];await idb('put','db',db);render();scrollTo(0,0)})});
 document.addEventListener('input',e=>{const t=e.target;
  if(t.dataset.qn){const[k,o]=t.dataset.qn.split('|');(D().v[k]??={})[o]=t.value;save();return}
- if(t.dataset.rtval){const k=t.dataset.rtval,ob=D().v[k]??={choice:'',value:''};ob.value=t.value;save();return}
  const k=t.dataset.k;if(!k)return;
  if(t.type=='checkbox'){const a=D().v[k]??=[];t.checked?a.push(t.dataset.o):a.splice(a.indexOf(t.dataset.o),1)}
- else if(t.type=='radio'){if(t.name==='5.2' && CR[5].f[2][0]==='rt'){D().v[k]??={choice:'',value:''};D().v[k].choice=t.dataset.o}else D().v[k]=t.dataset.o}else D().v[k]=t.value;save()});
+ else if(t.type=='radio')D().v[k]=t.dataset.o;else D().v[k]=t.value;save()});
 document.addEventListener('change',e=>{const t=e.target;
  if(t.dataset.qo){const k=t.dataset.qk,o=t.dataset.qo,ob=D().v[k]??={};if(t.checked)ob[o]=ob[o]??''; else delete ob[o];save();render();return}
  if(t.dataset.k=='inst.0'){const inf=INST[t.value];if(inf){D().v['inst.1']=inf.mail;D().v['inst.2']=inf.num}save();render()}});
@@ -426,170 +423,92 @@ async function mkppt(){
 const ppt=async()=>{const r=await buildPptBlob();if(r)dl(r.blob,r.name)};
 // --- Compte Rendu Installation : génération du Word ---
 const crfn=()=>'CR_Installation_'+cur+'_'+new Date().toISOString().slice(0,10);
-async function docImg(m,maxW=5.5,maxH=4){
- const{bytes,ext}=await pimgBytes(m),u=URL.createObjectURL(new Blob([bytes]));
- const dim=await new Promise(res=>{const im=new Image();im.onload=()=>res({w:im.naturalWidth,h:im.naturalHeight});im.onerror=()=>res({w:800,h:600});im.src=u});
- URL.revokeObjectURL(u);
- const ar=dim.w/Math.max(dim.h,1);let w=maxW,h=w/ar;if(h>maxH){h=maxH;w=h*ar}
- return new docx.ImageRun({data:bytes,transformation:{width:Math.round(w*96),height:Math.round(h*96)},type:ext=='png'?'png':'jpg'})}
-function crTbl(rows){
- return new docx.Table({width:{size:9350,type:docx.WidthType.DXA},columnWidths:[3000,6350],rows:rows.map(([l,v])=>new docx.TableRow({children:[
-  new docx.TableCell({width:{size:3000,type:docx.WidthType.DXA},shading:{type:docx.ShadingType.CLEAR,fill:'F2F2F2'},children:[new docx.Paragraph({children:[new docx.TextRun({text:l,bold:true})]})]}),
-  new docx.TableCell({width:{size:6350,type:docx.WidthType.DXA},children:[new docx.Paragraph({text:v||''})]})]}))})}
-const crH=t=>new docx.Paragraph({text:t,heading:docx.HeadingLevel.HEADING_2,spacing:{before:320,after:120}});
-let docxLoadPromise=null;
-async function ensureDocx(){
- if(window.docx)return window.docx;
- if(docxLoadPromise)return docxLoadPromise;
- docxLoadPromise=(async()=>{
-  const urls=window.__docxPrimaryFailed
-   ? ['https://unpkg.com/docx@8.2.4/build/index.umd.js','https://cdn.jsdelivr.net/npm/docx@8.2.4/build/index.umd.js']
-   : ['https://cdn.jsdelivr.net/npm/docx@8.2.4/build/index.umd.js','https://unpkg.com/docx@8.2.4/build/index.umd.js'];
-  for(const url of urls){
-   const ok=await new Promise(resolve=>{
-    const script=document.createElement('script');script.src=url;script.async=true;
-    script.onload=()=>resolve(!!window.docx);script.onerror=()=>resolve(false);
-    document.head.appendChild(script);
-   });
-   if(ok)return window.docx;
-  }
-  throw new Error('Aucun CDN docx n’a pu être chargé.');
- })();
- try{return await docxLoadPromise}catch(e){docxLoadPromise=null;throw e}
-}
+// Les photos de téléphone portent souvent une rotation EXIF : Word l'ignore, ce qui les faisait
+// apparaître couchées et déformées. On redessine donc chaque photo sur un canvas (le navigateur
+// applique l'orientation), puis on l'intègre en JPEG propre, avec ses vraies proportions.
+async function normImg(m,maxSide){
+ maxSide=maxSide||1800;
+ const load=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
+ let url=null,im;
+ try{
+  try{let blob=m.id?await idb('get','o:'+m.id):null;if(!blob)blob=await (await fetch(m.u)).blob();url=URL.createObjectURL(blob);im=await load(url)}
+  catch(e){im=await load(m.u)}
+  const k=Math.min(1,maxSide/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.max(1,Math.round(im.naturalWidth*k)),h=Math.max(1,Math.round(im.naturalHeight*k));
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);
+  const out=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));
+  return{bytes:await out.arrayBuffer(),w,h}
+ }finally{if(url)URL.revokeObjectURL(url)}}
+async function docImg(m,maxW,maxH){
+ maxW=maxW||5.5;maxH=maxH||5;
+ const{bytes,w:pw,h:ph}=await normImg(m),ar=pw/Math.max(ph,1);
+ let w=maxW,h=w/ar;if(h>maxH){h=maxH;w=h*ar}
+ return new docx.ImageRun({data:bytes,transformation:{width:Math.round(w*96),height:Math.round(h*96)},type:'jpg'})}
+async function photoBox(title,ms){
+ const n=ms.length,gap=.15,totalW=5.8,perW=(totalW-gap*(n-1))/n,kids=[];
+ for(let x=0;x<n;x++){kids.push(await docImg(ms[x],perW,5));if(x<n-1)kids.push(new docx.TextRun({text:'  '}))}
+ return new docx.Table({width:{size:9026,type:docx.WidthType.DXA},
+  borders:{top:BORD,bottom:BORD,left:BORD,right:BORD,insideHorizontal:BORD,insideVertical:BORD},
+  rows:[new docx.TableRow({cantSplit:true,children:[new docx.TableCell({width:{size:9026,type:docx.WidthType.DXA},children:[
+   new docx.Paragraph({children:[new docx.TextRun({text:title,bold:true,italics:true})],spacing:{after:140}}),
+   new docx.Paragraph({children:kids})]})]})]})}
+// Mise en forme alignée sur le gabarit papier : bordures noires simples, pas de fond gris,
+// titres en gras souligné (au lieu du style "Titre" de Word), bandeaux de couleur pour les
+// sections "Listing des photos attendues" et "Bilan Installation".
+const BORD={style:docx.BorderStyle.SINGLE,size:4,color:'000000'};
+function crTbl(rows,narrow){
+ const tw=narrow?5500:9026,lw=narrow?2300:3000;
+ return new docx.Table({width:{size:tw,type:docx.WidthType.DXA},columnWidths:[lw,tw-lw],
+  borders:{top:BORD,bottom:BORD,left:BORD,right:BORD,insideHorizontal:BORD,insideVertical:BORD},
+  rows:rows.map(([l,v])=>new docx.TableRow({children:[
+   new docx.TableCell({width:{size:lw,type:docx.WidthType.DXA},children:[new docx.Paragraph({text:l})]}),
+   new docx.TableCell({width:{size:tw-lw,type:docx.WidthType.DXA},children:[new docx.Paragraph({text:v||''})]})]}))})}
+const crH=t=>new docx.Paragraph({children:[new docx.TextRun({text:t+' :',bold:true,underline:{type:docx.UnderlineType.SINGLE}})],spacing:{before:260,after:100}});
+function crBanner(t,fill){
+ return new docx.Table({width:{size:9026,type:docx.WidthType.DXA},
+  borders:{top:BORD,bottom:BORD,left:BORD,right:BORD,insideHorizontal:BORD,insideVertical:BORD},
+  rows:[new docx.TableRow({children:[new docx.TableCell({width:{size:9026,type:docx.WidthType.DXA},shading:{type:docx.ShadingType.CLEAR,fill},children:[
+   new docx.Paragraph({alignment:docx.AlignmentType.CENTER,children:[new docx.TextRun({text:t,bold:true})]})]})]})]})}
+function bilanTbl(title,rows){
+ const tw=9026,lw=3000;
+ return new docx.Table({width:{size:tw,type:docx.WidthType.DXA},
+  borders:{top:BORD,bottom:BORD,left:BORD,right:BORD,insideHorizontal:BORD,insideVertical:BORD},
+  rows:[new docx.TableRow({children:[new docx.TableCell({columnSpan:2,width:{size:tw,type:docx.WidthType.DXA},shading:{type:docx.ShadingType.CLEAR,fill:'B4C6E7'},children:[
+    new docx.Paragraph({alignment:docx.AlignmentType.CENTER,children:[new docx.TextRun({text:title,bold:true})]})]})]}),
+   ...rows.map(([l,v])=>new docx.TableRow({children:[
+    new docx.TableCell({width:{size:lw,type:docx.WidthType.DXA},children:[new docx.Paragraph({text:l})]}),
+    new docx.TableCell({width:{size:tw-lw,type:docx.WidthType.DXA},children:[new docx.Paragraph({text:v||''})]})]}))]})}
 async function mkdocx(){
- if(!window.docx){try{await ensureDocx()}catch(e){alert("Le module Word n'a pas pu se charger. Vérifiez la connexion, ou demandez au service informatique d'autoriser cdn.jsdelivr.net et unpkg.com.");return null}}
- const X=window.docx;
- const {Document,Paragraph,TextRun,Table,TableRow,TableCell,ImageRun,AlignmentType,WidthType,BorderStyle,ShadingType}=X;
- const pageWidth=10620;
- const read=(i,j)=>D().v[i+'.'+j];
- const value=(i,j)=>{
-  const v=read(i,j);
-  if(v&&typeof v==='object'&&!Array.isArray(v))return [v.choice,v.value].filter(x=>x!==undefined&&x!==null&&String(x).trim()!=='').join(' — ');
-  return fmtv(v);
- };
- const txt=(text,opt={})=>new Paragraph({
-  alignment:opt.align||AlignmentType.LEFT,
-  pageBreakBefore:!!opt.pageBreakBefore,
-  spacing:{before:opt.before??20,after:opt.after??45,line:opt.line??220},
-  children:[new TextRun({text:String(text??''),fontFace:'Arial',size:opt.size??16,bold:!!opt.bold,italics:!!opt.italics,color:opt.color||'172330'})]
- });
- const borders={
-  top:{style:BorderStyle.SINGLE,size:4,color:'AEB8C2'},bottom:{style:BorderStyle.SINGLE,size:4,color:'AEB8C2'},
-  left:{style:BorderStyle.SINGLE,size:4,color:'AEB8C2'},right:{style:BorderStyle.SINGLE,size:4,color:'AEB8C2'},
-  insideHorizontal:{style:BorderStyle.SINGLE,size:3,color:'D7DDE3'},insideVertical:{style:BorderStyle.SINGLE,size:3,color:'D7DDE3'}
- };
- const paraCell=(textOrChildren,width,fill='FFFFFF')=>new TableCell({
-  width:{size:width,type:WidthType.DXA},
-  shading:{type:ShadingType.CLEAR,fill},
-  margins:{top:35,bottom:35,left:90,right:90},
-  verticalAlign:'center',
-  children:Array.isArray(textOrChildren)?textOrChildren:[textOrChildren]
- });
- const mkTable=(rows,widths)=>new Table({
-  width:{size:widths.reduce((a,b)=>a+b,0),type:WidthType.DXA},columnWidths:widths,borders,rows
- });
- const section=(name,breakBefore=false)=>new Paragraph({
-  pageBreakBefore:breakBefore,
-  spacing:{before:95,after:65},
-  border:{bottom:{style:BorderStyle.SINGLE,size:8,color:'198A70',space:3}},
-  children:[new TextRun({text:name,fontFace:'Arial',size:22,bold:true,color:'14202E'})]
- });
- const fieldTable=rows=>mkTable(rows.map(([label,val])=>new TableRow({children:[
-  paraCell(txt(label,{size:15,bold:true,after:0}),4200,'F1F4F6'),
-  paraCell(txt(val||'',{size:16,after:0}),6420,'FFFFFF')
- ]})),[4200,6420]);
- const smallTitle=t=>txt(t,{size:18,bold:true,before:65,after:35,color:'14202E'});
- const photoLabel=j=>(CR[6].photos||[])[j]||('Photo '+(j+1));
- async function photoGrid(items,cols,heightIn){
-  const widths=Array(cols).fill(Math.floor(pageWidth/cols));widths[widths.length-1]+=pageWidth-widths.reduce((a,b)=>a+b,0);
-  const rows=[];
-  for(let i=0;i<items.length;i+=cols){
-   const keys=items.slice(i,i+cols),cells=[];
-   for(const j of keys){
-    const k='rp6.'+j,ms=D().m[k]||[],contents=[txt(photoLabel(j),{size:13,bold:true,after:30})];
-    if(ms.length){
-     for(const m of ms){try{const img=await docImg(m,6.2/cols,heightIn/Math.max(1,ms.length));contents.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:10,after:20},children:[img]}))}catch(e){contents.push(txt('Image non lisible',{size:13,color:'C0392B'}))}}
-    }else{
-     contents.push(txt('PHOTO MANQUANTE',{size:14,bold:true,color:'B45309',after:20}));
-     const spacers=heightIn>=2.5?4:heightIn>=1.45?2:1;
-     for(let n=0;n<spacers;n++)contents.push(txt(' ',{size:9,after:heightIn>=2.5?360:heightIn>=1.45?210:80}));
-    }
-    cells.push(paraCell(contents,widths[cells.length],'F8F9FA'));
-   }
-   while(cells.length<cols)cells.push(paraCell(txt(' ',{size:10,after:40}),widths[cells.length],'FFFFFF'));
-   rows.push(new TableRow({children:cells}));
-  }
-  return mkTable(rows,widths);
- }
- const children=[];
- const visitDate=value(0,1)||'';
- const reportDate=visitDate&&/^\d{4}-\d{2}-\d{2}$/.test(visitDate)?visitDate.split('-').reverse().join('/'):visitDate;
- children.push(txt('COMPTE RENDU INSTALLATION',{size:30,bold:true,before:0,after:30,color:'14202E'}));
- children.push(txt(cur+'  •  '+new Date().toLocaleDateString('fr-FR'),{size:20,bold:true,after:70,color:'198A70'}));
- children.push(section('Informations Intervention'));
- children.push(fieldTable([['Société',value(0,0)],['Date de la visite',reportDate], ["Heure d'arrivée",value(0,2)],['Heure de départ',value(0,3)],['Nom intervenant',value(0,4)]]));
- children.push(section('Informations Client'));
- children.push(fieldTable([['Nom',value(1,0)],['Prénom',value(1,1)],['Adresse',value(1,2)],['Email',value(1,3)],['N° PDL',value(1,4)],['Type installation électrique',value(1,5)],['Contrat ENEDIS : puissance souscrite',value(1,6)],['Type de compteur',value(1,7)],['Localisation du compteur',value(1,8)],['Localisation du disjoncteur',value(1,9)],['Distance entre compteur et disjoncteur (m)',value(1,10)]]));
- children.push(section('Informations connectivité'));
- children.push(fieldTable([['Couverture GSM',value(2,0)],['Qualité signal WIFI',value(2,1)],['Ethernet disponible',value(2,2)],['WIFI (SSID / remarque)',value(2,3)]]));
- children.push(section('Détails produit'));
- const prodVal=value(3,0),prodCode=String(read(3,0)||'').split(' / ')[0],prodName=PROD[prodCode]||'';
- const productRows=[new TableRow({children:[paraCell(txt('Type de produit',{size:14,bold:true}),3900,'B7CAE8'),paraCell(txt('Référence',{size:14,bold:true}),6720,'B7CAE8')]})];
- for(const [code,name] of [['PBBM11T2S','UNO MONO'],['PBBM13T2S','UNO TRI'],['PBBM31T2SGM','VERSO MONO'],['PBBM33T2SGM','VERSO TRI']])productRows.push(new TableRow({children:[paraCell(txt(name,{size:14}),3900,'FFFFFF'),paraCell(txt(code,{size:14}),6720,'FFFFFF')]}));
- children.push(smallTitle('RÉFÉRENCES PRODUIT'));
- children.push(mkTable(productRows,[3900,6720]));
- children.push(fieldTable([['Type de produit',prodVal||(prodName?prodCode+' / '+prodName:'')],['N° Série',value(3,1)],['Type installation',value(3,2)],['Bridage de la borne',value(3,3)]]));
-
- children.push(section('Informations électriques',true));
- children.push(fieldTable([['Résistance de terre (Ω, conforme ≤ 100)',value(4,0)],['Tension Terre / Neutre',value(4,1)],['Présence d’un délesteur déjà existant',value(4,2)],['Gestion dynamique de puissance',value(4,3)]]));
- children.push(section('Conformité électrique'));
- const checks=[];
- CR[5].f.forEach((f,j)=>{
-  if(j===2){const v=read(5,2)||{};checks.push([f[1],v.choice||'']);checks.push(['Valeur du calibre',v.value||'']);}
-  else checks.push([f[1],value(5,j)]);
- });
- children.push(fieldTable(checks));
- children.push(section('Listing des photos attendues'));
- children.push(await photoGrid([0,1],1,1.65));
-
- children.push(section('Étiquette produit et Quickguide',true));
- children.push(await photoGrid([2],1,5.6));
-
- children.push(section('Linky et contrôles avant / après installation',true));
- children.push(smallTitle('Photos du Linky après installation'));
- children.push(await photoGrid([3,4,5],3,1.05));
- children.push(smallTitle('Mesure de terre — avant et après installation'));
- children.push(await photoGrid([6,7],2,1.05));
- children.push(smallTitle('Commutateur rotatif à l’intérieur de la borne'));
- children.push(await photoGrid([8],1,1.1));
-
- children.push(section('Gestion dynamique de puissance',true));
- children.push(await photoGrid([9,10],2,3.3));
-
- children.push(section('Configuration et protections',true));
- children.push(await photoGrid([11,12],2,3.3));
-
- children.push(section('Installation de la borne et essai',true));
- children.push(await photoGrid([13,14],2,3.3));
-
- children.push(section('Bilan installation',true));
- children.push(fieldTable([['Avez-vous constaté une différence entre la VT et l’installation ?',value(7,0)],['Si oui, lesquelles ?',value(7,1)],['Autres commentaires',value(7,2)]]));
-
- children.push(section('Signatures',true));
- const signatureCell=async(label,k)=>{
-  const content=[txt(label,{size:17,bold:true,after:80}),txt('Nom / date : __________________________________',{size:14,after:80})];
-  const ms=D().m[k]||[];
-  if(ms.length){for(const m of ms){try{content.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:30,after:50},children:[await docImg(m,3.1,1.2)]}))}catch(e){content.push(txt('Signature non lisible',{size:13,color:'C0392B'}))}}
-  }else{content.push(txt('Signature à recueillir',{size:14,italics:true,color:'697684',after:70}));for(let i=0;i<3;i++)content.push(txt(' ',{size:10,after:180}))}
-  return paraCell(content,5310,'F8F9FA');
- };
- const sigClient=await signatureCell('Signature client','8.0'),sigInstaller=await signatureCell('Signature installateur','8.1');
- children.push(mkTable([new TableRow({children:[sigClient,sigInstaller]})],[5310,5310]));
-
- const doc=new Document({creator:'ENSIO — Outils terrain',title:'Compte Rendu Installation — '+cur,description:'Compte rendu généré depuis le checklist terrain',sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:650,right:810,bottom:600,left:810}}},children}]});
- return doc;
-}
+ if(!window.docx){alert("Le module Word n'a pas pu se charger (pas de connexion au premier chargement, ou réseau qui bloque le site de la bibliothèque).");return null}
+ const V=(i,j)=>fmtv(D().v[i+'.'+j]);
+ const children=[new docx.Paragraph({text:'Compte Rendu Installation',heading:docx.HeadingLevel.TITLE}),
+  new docx.Paragraph({text:cur+' — '+new Date().toLocaleDateString('fr-FR'),spacing:{after:200}}),
+  crH('Informations Intervention'),
+  crTbl([['Société',V(0,0)],['Date visite',V(0,1)],["Heure d'arrivée",V(0,2)],['Heure de départ',V(0,3)],['Nom intervenant',V(0,4)]],true),
+  crH('Informations Client'),
+  crTbl([['Nom',V(1,0)],['Prénom',V(1,1)],['Adresse',V(1,2)],['Email',V(1,3)],['N° PDL',V(1,4)],['Type installation électrique',V(1,5)],['Contrat ENEDIS : puissance souscrite',V(1,6)],['Type de compteur',V(1,7)],['Localisation du compteur',V(1,8)],['Localisation du disjoncteur',V(1,9)],['Distance compteur / disjoncteur',V(1,10)]]),
+  crH('Informations connectivité'),
+  crTbl([['Couverture GSM',V(2,0)],['Qualité signal WIFI',V(2,1)],['Ethernet disponible',V(2,2)],['WIFI',V(2,3)]]),
+  crH('Détails produit'),
+  crTbl([['Type de produit',V(3,0)],['N° Série',V(3,1)],['Type installation',V(3,2)],['Bridage de la borne',V(3,3)]]),
+  crH('Informations électriques'),
+  crTbl([['Résistance de terre (Ω)',V(4,0)],['Tension Terre / Neutre',V(4,1)],['Délesteur déjà existant',V(4,2)],['Gestion dynamique de puissance',V(4,3)]]),
+  crH('Conformité électrique'),
+  crTbl(CR[5].f.map((f,j)=>[f[1],V(5,j)]))];
+ children.push(new docx.Paragraph({text:'',spacing:{after:120}}));
+ children.push(crBanner('Listing des photos attendues','FFE699'));
+ const ph=CR.find(x=>x.photos);
+ for(let j=0;j<ph.photos.length;j++){const k='rp'+ph.i+'.'+j,ms=D().m[k]||[];if(!ms.length)continue;
+  children.push(await photoBox(ph.photos[j],ms));
+  children.push(new docx.Paragraph({text:'',spacing:{after:120}}))}
+ children.push(new docx.Paragraph({text:'',spacing:{after:120}}));
+ children.push(bilanTbl('Bilan Installation',CR[7].f.map((f,j)=>[f[1],V(7,j)])));
+ children.push(crH('Signatures'));
+ const sigSec=CR[8];
+ for(let j=0;j<sigSec.f.length;j++){const k='8.'+j,ms=D().m[k]||[];
+  children.push(new docx.Paragraph({children:[new docx.TextRun({text:sigSec.f[j][1],bold:true})],spacing:{before:160,after:60}}));
+  if(ms[0])children.push(new docx.Paragraph({children:[await docImg(ms[0],3,1.4)],spacing:{after:120}}))}
+ return new docx.Document({sections:[{children}]})}
 const word=async()=>{const doc=await mkdocx();if(doc)dl(await docx.Packer.toBlob(doc),crfn()+'.docx')};
 async function crZip(){
  const doc=await mkdocx();if(!doc)return;
