@@ -131,7 +131,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 <input type="file" id="fi" accept="image/*" capture="environment" hidden>
 <input type="file" id="fg" accept="image/*" hidden>
 <script>
-const T=l=>['t',l],Dt=l=>['d',l],R=(l,o)=>['r',l,o.split('|')],C=(l,o)=>['c',l,o.split('|')],Q=(l,o)=>['q',l,o.split('|')],Sel=(l,o)=>['s',l,o.split('|')],Sig=l=>['sig',l];
+const today=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
+// Valeur par défaut (4e élément d'un champ) : texte ou fonction ; appliquée une seule fois, tant que le champ n'a jamais été rempli.
+const T=(l,d)=>['t',l,null,d],Dt=(l,d)=>['d',l,null,d],R=(l,o)=>['r',l,o.split('|')],C=(l,o)=>['c',l,o.split('|')],Q=(l,o)=>['q',l,o.split('|')],Sel=(l,o,d)=>['s',l,o.split('|'),d],Sig=l=>['sig',l];
 const S=[
 {t:'Information site',f:[T("Donneur d'ordre : entreprise / nom"),T('Client livré / ville'),T('Adresse du site'),Dt('Date de la visite technique'),R('Accès au site','Facile|Modéré|Difficile'),T('Contact visite technique'),T("Personnes présentes à l'audit (entreprise, nom, fonction, email, tél.)"),T('Opportunité')]},
 {t:'Information Installateur',id:'inst',f:[Sel('Nom Installateur','Benoit SMOLEN|Benjamin MOUTON|Romuald TURLUT|Serkan ERDOGAN'),T('Mail Installateur'),T('Num Installateur'),T('Version')]},
@@ -146,17 +148,22 @@ const S=[
 {t:'Plans du technicien',plan:1,f:[T('Notes pour le bureau d\'études')]}
 ];
 const CR=[
-{t:'Informations Intervention',f:[T('Société'),Dt('Date de la visite'),T("Heure d'arrivée"),T('Heure de départ'),T('Nom intervenant')]},
-{t:'Informations Client',f:[T('Nom'),T('Prénom'),T('Adresse'),T('Email'),T('N° PDL'),T('Type installation électrique'),T('Contrat ENEDIS : puissance souscrite'),R('Type de compteur','Linky|Autre'),T('Localisation du compteur'),T('Localisation du disjoncteur'),T('Distance entre compteur et disjoncteur (m)')]},
+{t:'Informations Intervention',f:[T('Société','ENSIO'),Dt('Date de la visite',today),T("Heure d'arrivée"),T('Heure de départ'),Sel('Nom intervenant','Yanick SELE|Benjamin MOUTON|Romuald TURLUT')]},
+{t:'Informations Client',f:[T('Nom',()=>cur),T('Prénom'),T('Adresse'),T('Email'),T('N° PDL'),T('Type installation électrique'),T('Contrat ENEDIS : puissance souscrite'),R('Type de compteur','Linky|Autre'),T('Localisation du compteur'),T('Localisation du disjoncteur'),T('Distance entre compteur et disjoncteur (m)')]},
 {t:'Informations connectivité',f:[R('Couverture GSM','Bonne|Moyenne|Faible'),R('Qualité signal WIFI','Bonne|Moyenne|Faible'),R('Ethernet disponible','Oui|Non'),T('WIFI (SSID / remarque)')]},
 {t:'Détails produit',f:[Sel('Type de produit','PBBM11T2S / UNO MONO|PBBM13T2S / UNO TRI|PBBM31T2SGM / VERSO MONO|PBBM33T2SGM / VERSO TRI'),T('N° Série'),R('Type installation','Intérieure|Extérieure'),T('Bridage de la borne')]},
 {t:'Informations électriques',f:[T('Résistance de terre (Ω, conforme ≤ 100)'),T('Tension Terre / Neutre'),R("Présence d'un délesteur déjà existant",'Oui|Non'),R('Gestion dynamique de puissance','TIC|Eastron|Aucune')]},
 {t:'Conformité électrique',f:[R('Protection individuelle de chaque point de charge par DDR ≤ 30 mA','Oui|Non'),R('Test du dispositif DDR satisfaisant (type A mono / type B tri+N ou équiv.)','Oui|Non'),R('Calibre du disjoncteur conforme à la puissance (20A/3,7kW, 40A/7,4kW, 20A4P/11kW, 40A4P/22kW)','Oui|Non'),Sel('Calibre retenu','20A courbe C (3,7 kW)|40A courbe C (7,4 kW)|20A courbe C 4P (11 kW)|40A courbe C 4P (22 kW)'),R('Section du câble adaptée au calibre du disjoncteur','Oui|Non'),R('Mesure de continuité point de charge / barrette de terre ≤ 2 Ω','Oui|Non'),R("Absence d'inversion entre neutre et phase",'Oui|Non')]},
 {t:'Photos',photos:['Disjoncteur de protection',"Tableau électrique ouvert avant intervention",'Étiquette produit (gauche) et étiquette Quickguide',"Linky après installation — Puissance souscrite","Linky après installation — Puissance max atteinte (journée en cours)","Linky après installation — Puissance apparente en temps réel",'Mesure de terre — avant installation','Mesure de terre — après installation',"Commutateur rotatif à l'intérieur de la borne",'Matériel raccordé à la borne (gestion dynamique)','Matériel raccordé côté tableau (gestion dynamique)','Rapport de config après connexion WIFI (page rafraîchie)','Vue d\'ensemble tableau ouvert et des protections',"Vue d'ensemble borne ouverte et borne posée",'Borne en test de charge (simulateur ou VE)'],f:[]},
 {t:'Bilan Installation',f:[R("Différence constatée entre la VT et l'installation",'Oui|Non'),T('Si oui, lesquelles'),T('Autres commentaires')]},
-{t:'Signatures',f:[Sig('Signature client'),Sig('Signature installateur')]}
+{t:'Signatures',f:[Sig('Signature client'),Sig('Signature installateur')]},
+{t:'Réserves',f:[R('Y a-t-il des réserves sur ce chantier ?','Non|Oui')]},
+{t:'Procès-verbal de fin de travaux',when:()=>pvOn(),f:[T('Nom du client',()=>[fmtv(D().v['1.1']),fmtv(D().v['1.0'])].filter(Boolean).join(' ')),T('Adresse du chantier',()=>fmtv(D().v['1.2'])),T('Objet des travaux','Pose de borne électrique'),T('Référence de la proposition ENSIO EST'),T('Référence de la commande client'),T('Remarques éventuelles')]},
+{t:'PV — Représentant client',when:()=>pvOn(),f:[T('Nom',()=>fmtv(D().v['10.0'])),Dt('Date',today),Sig('Signature')]},
+{t:'PV — Représentant ENSIO EST',when:()=>pvOn(),f:[T('Nom',()=>fmtv(D().v['0.4'])),Dt('Date',today),Sig('Signature et cachet société')]}
 ];
 CR.forEach((x,i)=>x.i=x.id||i);
+const pvOn=()=>app=='cr'&&D().v['9.0']=='Non';
 const PV=[
 {t:'Procès-verbal de fin de travaux',f:[T('Nom du client'),T('Adresse du chantier'),T('Objet des travaux'),T('Référence de la proposition ENSIO EST'),T('Référence de la commande client'),R('Réception','Sans réserve|Avec réserve'),T('Remarques éventuelles')]},
 {t:'Représentant Client',f:[T('Nom'),Dt('Date'),Sig('Signature')]},
@@ -187,7 +194,12 @@ let app=null,db={clients:['Renault','50five','Amara Net Zero France','Bump','Cap
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
 const fmtv=v=>Array.isArray(v)?v.join(', '):(v&&typeof v=='object')?Object.entries(v).map(([o,q])=>o+(q?' ('+q+')':'')).join(', '):(v||'');
-const D=()=>{const k=app=='irve'?cur:app+':'+cur;return db.data[k]??={v:{},m:{}}};
+const dkey=()=>app=='irve'?cur:app+':'+cur;
+const D=()=>db.data[dkey()]??={v:{},m:{}};
+const defv=f=>typeof f[3]=='function'?f[3]():f[3];
+function seedDefaults(FORM){let ch=0;const dd=D();
+ FORM.forEach(s=>(s.f||[]).forEach((f,j)=>{if(f[3]===undefined)return;const k=s.i+'.'+j;if(dd.v[k]!==undefined)return;const v=defv(f);if(v!==undefined&&v!==''){dd.v[k]=v;ch=1}}));
+ if(ch)save()}
 const idb=(m,k,v)=>new Promise(r=>{const o=indexedDB.open('irve',1);o.onupgradeneeded=()=>o.result.createObjectStore('k');o.onsuccess=()=>{const s=o.result.transaction('k',m=='get'?'readonly':'readwrite').objectStore('k'),q=m=='get'?s.get(k):m=='put'?s.put(v,k):s.delete(k);q.onsuccess=()=>r(q.result)}});
 const save=()=>{clearTimeout(tm);tm=setTimeout(()=>idb('put','db',db).then(()=>{const e=$('#st');if(e){e.textContent='Enregistré';setTimeout(()=>{e.textContent=''},2000)}}),400)};
 const I={sl:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="1"/><path d="M12 17v4M8 21h8"/></svg>',cam:'<svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',img:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg>',pen:'<svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>',trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',doc:'<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',box:'<svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4v9l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v9"/></svg>',back:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',go:'<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'};
@@ -200,9 +212,10 @@ function render(){
   mn.innerHTML='<h2 class="hi">Choisir un outil</h2>'+TOOLS.map(t=>`<button class="cl" data-app="${t.id}">${esc(t.name)}${I.go}</button>`).join('');return}
  if(!cur){nv.hidden=true;const tn=(TOOLS.find(t=>t.id==app)||{}).name||'';hd.innerHTML=`<button class="t" data-apphome="1">${I.back}Outils</button><h1>${esc(tn)}</h1>`;
   mn.innerHTML='<h2 class="hi">Clients</h2>'+db.clients.map(c=>`<button class="cl" data-cl="${esc(c)}">${esc(c)}${I.go}</button>`).join('')+'<button class="s" data-nc="1">+ Ajouter un client</button>';return}
- const FORM=app=='irve'?S:app=='cr'?CR:PV;
+ const FORM=(app=='irve'?S:app=='cr'?CR:PV).filter(s=>!s.when||s.when());
+ seedDefaults(FORM);
  const expBtns=app=='irve'?`<button class="s" data-pdf="1">${I.doc}PDF</button><button class="s" data-ppt="1">${I.sl}PPT</button><button data-zip="1">${I.box}Tout exporter</button>`
-  :app=='cr'?`<button class="s" data-word="1">${I.doc}Word</button><button data-crzip="1">${I.box}Tout exporter</button>`
+  :app=='cr'?`<button class="s" data-word="1">${I.doc}Word</button>${pvOn()?`<button class="s" data-crpv="1">${I.doc}PV</button>`:''}<button data-crzip="1">${I.box}Tout exporter</button>`
   :`<button class="s" data-pdf="1">${I.doc}PDF</button><button data-zip="1">${I.box}Tout exporter</button>`;
  hd.innerHTML=`<button class="t" data-home="1">${I.back}Clients</button><h1>${esc(cur)}</h1><span id="st"></span><button class="t d" data-reset="1">${I.trash}Réinitialiser</button>${expBtns}`;
  nv.hidden=false;nv.innerHTML=FORM.map((s,i)=>`<a href="#s${i}">${s.t}</a>`).join('');
@@ -276,7 +289,7 @@ function edit(src,w,h,cb){
   if(d.ok){cb(c.toDataURL('image/jpeg',.8),w,h);close()}
   if(d.no)ask('Fermer sans enregistrer ?','Fermer',1).then(y=>{if(y)close()})}
 }
-document.addEventListener('click',e=>{const b=e.target.closest('[data-app],[data-apphome],[data-cl],[data-nc],[data-home],[data-pdf],[data-zip],[data-ppt],[data-word],[data-crzip],[data-reset],[data-ph],[data-gal],[data-ras],[data-plan],[data-sig],[data-del]');if(!b)return;const d=b.dataset;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-app],[data-apphome],[data-cl],[data-nc],[data-home],[data-pdf],[data-zip],[data-ppt],[data-word],[data-crzip],[data-crpv],[data-reset],[data-ph],[data-gal],[data-ras],[data-plan],[data-sig],[data-del]');if(!b)return;const d=b.dataset;
  if(d.app){app=d.app;render()}
  if(d.apphome){app=null;render()}
  if(d.cl){cur=d.cl;render()}
@@ -287,6 +300,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-app],[data
  if(d.ppt)ppt();
  if(d.word)word();
  if(d.crzip)crZip();
+ if(d.crpv)crPvPdf();
  if(d.ph){tgt=d.ph;$('#fi').click()}
  if(d.gal){tgt=d.gal;$('#fg').click()}
  if(d.plan)edit(null,1600,1100,(u,w,h)=>add(d.plan,u,w,h));
@@ -296,7 +310,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-app],[data
   else{dd.rasPrev[k]=dd.v[k]||'';dd.v[k]='RAS';dd.ras[k]=true}
   save();render()}
  if(d.del){const[k,i]=d.del.split('|');ask('Supprimer cette image ?','Supprimer',1).then(y=>{if(y){const[m]=D().m[k].splice(i,1);if(m.id)idb('del','o:'+m.id);save();render()}})}
- if(d.reset)ask('Réinitialiser le formulaire « '+cur+' » ? Toutes les réponses, photos (originaux compris), écritures et plans de ce client seront supprimés définitivement. Pensez à exporter avant.','Tout supprimer',1).then(async y=>{if(!y)return;for(const k in D().m)for(const m of D().m[k])if(m.id)await idb('del','o:'+m.id);delete db.data[cur];await idb('put','db',db);render();scrollTo(0,0)})});
+ if(d.reset)ask('Réinitialiser le formulaire « '+cur+' » ? Toutes les réponses, photos (originaux compris), écritures et plans de ce client seront supprimés définitivement. Pensez à exporter avant.','Tout supprimer',1).then(async y=>{if(!y)return;for(const k in D().m)for(const m of D().m[k])if(m.id)await idb('del','o:'+m.id);delete db.data[dkey()];await idb('put','db',db);render();scrollTo(0,0)})});
 document.addEventListener('input',e=>{const t=e.target;
  if(t.dataset.qn){const[k,o]=t.dataset.qn.split('|');(D().v[k]??={})[o]=t.value;save();return}
  const k=t.dataset.k;if(!k)return;
@@ -304,6 +318,7 @@ document.addEventListener('input',e=>{const t=e.target;
  else if(t.type=='radio')D().v[k]=t.dataset.o;else D().v[k]=t.value;save()});
 document.addEventListener('change',e=>{const t=e.target;
  if(t.dataset.qo){const k=t.dataset.qk,o=t.dataset.qo,ob=D().v[k]??={};if(t.checked)ob[o]=ob[o]??''; else delete ob[o];save();render();return}
+ if(app=='cr'&&t.dataset.k=='9.0'){save();render();return}
  if(t.dataset.k=='inst.0'){const inf=INST[t.value];if(inf){D().v['inst.1']=inf.mail;D().v['inst.2']=inf.num}save();render()}});
 $('#fi').onchange=$('#fg').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const im=new Image(),k=tgt;
  im.onload=()=>{const s=Math.min(1,1280/Math.max(im.width,im.height));edit(im,Math.round(im.width*s),Math.round(im.height*s),(u,w,h)=>add(k,u,w,h,f))};
@@ -502,7 +517,7 @@ async function mkdocx(){
   children.push(await photoBox(ph.photos[j],ms));
   children.push(new docx.Paragraph({text:'',spacing:{after:120}}))}
  children.push(new docx.Paragraph({text:'',spacing:{after:120}}));
- children.push(bilanTbl('Bilan Installation',CR[7].f.map((f,j)=>[f[1],V(7,j)])));
+ children.push(bilanTbl('Bilan Installation',[...CR[7].f.map((f,j)=>[f[1],V(7,j)]),['Réserves sur le chantier',V(9,0)]]));
  children.push(crH('Signatures'));
  const sigSec=CR[8];
  for(let j=0;j<sigSec.f.length;j++){const k='8.'+j,ms=D().m[k]||[];
@@ -514,17 +529,18 @@ async function crZip(){
  const doc=await mkdocx();if(!doc)return;
  if(!window.JSZip)return alert('Module ZIP indisponible : vérifier la connexion au premier chargement.');
  const z=new JSZip(),base=crfn();z.file(base+'.docx',await docx.Packer.toBlob(doc));
+ if(pvOn()){const pd=mkPv(crPvData());if(pd)z.file(pvfn()+'.pdf',pd.output('blob'))}
  const ph=CR.find(x=>x.photos);
  for(let j=0;j<ph.photos.length;j++){const k='rp'+ph.i+'.'+j,nm=slug(ph.photos[j]);let n=0;
   for(const m of D().m[k]||[]){if(!m.id)continue;const o=await idb('get','o:'+m.id);if(o)z.file('Photos_originales/'+nm+'_'+(++n)+'.'+m.ext,o)}}
  dl(await z.generateAsync({type:'blob'}),base+'.zip')}
 // --- Procès-verbal de fin de travaux : PDF dans la mise en page du document papier ---
 const pvfn=()=>'PV_'+cur+'_'+new Date().toISOString().slice(0,10);
-function mkPv(){
+function mkPv(dat){dat=dat||D();
  if(!window.jspdf){alert('Le module PDF est indisponible : vérifier la connexion au premier chargement.');return null}
  const d=new window.jspdf.jsPDF('p','mm','a4'),L=15,W=180;let y=L;
  const pg=h=>{if(y+h>284){d.addPage();y=L}};
- const V=(i,j)=>fmtv(D().v[i+'.'+j]);
+ const V=(i,j)=>fmtv(dat.v[i+'.'+j]);
  const img=(u,w,h)=>{let ww=Math.min(W,w*.15),hh=ww*h/w;if(hh>120){hh=120;ww=hh*w/h}pg(hh+3);d.addImage(u,'JPEG',L,y,ww,hh);y+=hh+3};
  // en-tête : logo / titre / adresse société, dans 3 cases
  const hH=16,c1=55,c2=65,c3=W-c1-c2;
@@ -541,7 +557,7 @@ function mkPv(){
  y+=rh*rows.length+6;
  d.setFontSize(9);d.text('Référence de la proposition ENSIO EST : '+V(0,3),L,y);d.line(L+90,y+.8,L+W,y+.8);y+=8;
  d.text('Référence de la commande client : '+V(0,4),L,y);d.line(L+75,y+.8,L+W,y+.8);y+=10;
- const recep=D().v['0.5'];
+ const recep=dat.v['0.5'];
  const chk=(x,sel)=>{d.rect(L+x,y-3.2,4,4);if(sel)d.text('X',L+x+.6,y-.1)};
  chk(55,recep=='Sans réserve');d.text('Réception sans réserve',L+61,y);
  chk(130,recep=='Avec réserve');d.text('Réception avec réserve',L+136,y);
@@ -554,7 +570,7 @@ function mkPv(){
   d.text('Nom : '+V(si==0?1:2,0),x0,y+6);
   d.text('Date : '+V(si==0?1:2,1),x0,y+12);
   d.text((si==0?'Signature':'Signature et cachet société')+' :',x0,y+18);
-  const sm=(D().m[(si==0?1:2)+'.2']||[])[0];if(sm)d.addImage(sm.u,'JPEG',x0,y+20,cw-4,18)};
+  const sm=(dat.m[(si==0?1:2)+'.2']||[])[0];if(sm)d.addImage(sm.u,'JPEG',x0,y+20,cw-4,18)};
  const topY=y;sigBlock('Représentant Client :',0);y=topY;sigBlock('Représentant ENSIO EST :',1);y=topY+40;
  // bandeau Levées de Réserves
  pg(10);d.setFillColor(222,235,250);d.rect(L,y-5,W,7,'F');d.setFont('helvetica','bold');d.setFontSize(10);d.text('Levées de Réserves',L+W/2,y,{align:'center'});y+=9;
@@ -565,14 +581,23 @@ function mkPv(){
   d.text('Nom : '+V(sIdx,0),x0,y+6);
   d.text('Date : '+V(sIdx,1),x0,y+12);
   d.text((si==0?'Signature':'Signature et cachet société')+' :',x0,y+18);
-  const sm=(D().m[sIdx+'.2']||[])[0];if(sm)d.addImage(sm.u,'JPEG',x0,y+20,cw-4,18)};
+  const sm=(dat.m[sIdx+'.2']||[])[0];if(sm)d.addImage(sm.u,'JPEG',x0,y+20,cw-4,18)};
  y=topY2;sigBlock2('Représentant Client :',0);y=topY2;sigBlock2('Représentant ENSIO EST :',1);y=topY2+40;
  // photos
- const ph=D().m['p'+PV[5].i]||[];
+ const ph=dat.m['p'+PV[5].i]||[];
  if(ph.length){pg(10);d.setFillColor(16,35,58);d.setTextColor(255);d.rect(L,y-5,W,7,'F');d.text('Photos',L+2,y);d.setTextColor(0);y+=8;
   ph.forEach(m=>img(m.u,m.w,m.h))}
  return d}
 const pvPdf=()=>{const d=mkPv();if(d)dl(d.output('blob'),pvfn()+'.pdf')};
+// PV intégré au Compte Rendu : on recopie ses champs (sections 10, 11, 12 du CR) vers les clés du PV autonome
+function crPvData(){
+ const d=D(),o={v:{},m:{}};
+ for(let j=0;j<5;j++)o.v['0.'+j]=d.v['10.'+j];
+ o.v['0.5']='Sans réserve';o.v['0.6']=d.v['10.5'];
+ o.v['1.0']=d.v['11.0'];o.v['1.1']=d.v['11.1'];o.v['2.0']=d.v['12.0'];o.v['2.1']=d.v['12.1'];
+ o.m['1.2']=d.m['11.2'];o.m['2.2']=d.m['12.2'];
+ return o}
+const crPvPdf=()=>{const d=mkPv(crPvData());if(d)dl(d.output('blob'),pvfn()+'.pdf')};
 async function pvZip(){
  const d=mkPv();if(!d)return;if(!window.JSZip)return alert('Module ZIP indisponible : vérifier la connexion au premier chargement.');
  const z=new JSZip();z.file(pvfn()+'.pdf',d.output('blob'));
